@@ -61,7 +61,7 @@ export default async function DashboardPage() {
           action={<Link href="/dashboard/leads" className="text-sm text-primary hover:underline">Ver todas</Link>}
         >
           <div className="space-y-3">
-            {recentLeads.map((lead) => (
+            {(recentLeads as { id: string; name: string; email: string; phone: string | null }[]).map((lead) => (
               <div key={lead.id} className="flex items-center justify-between rounded-lg bg-muted/50 px-4 py-3">
                 <div className="min-w-0 flex-1">
                   <div className="text-sm font-medium text-foreground">{lead.name}</div>
@@ -97,7 +97,7 @@ export default async function DashboardPage() {
           action={<Link href="/dashboard/propiedades" className="text-sm text-primary hover:underline">Ver todas</Link>}
         >
           <div className="space-y-3">
-            {topProperties.map((property) => (
+            {(topProperties as { id: string; title: string; city: string | null; _count: { leads: number } }[]).map((property) => (
               <div key={property.id} className="flex items-center justify-between rounded-lg bg-muted/50 px-4 py-3">
                 <div className="min-w-0 flex-1">
                   <div className="text-sm font-medium text-foreground truncate">{property.title}</div>
