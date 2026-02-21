@@ -50,7 +50,7 @@ export default async function DashboardPropertiesPage() {
             <DataTableHead className="text-right">Acciones</DataTableHead>
           </DataTableHeader>
           <DataTableBody>
-            {result.properties.map((property) => (
+            {(result.properties as { id: string; title: string; city: string | null; type: string; operation: string; price: unknown; currency: string; status: string; slug: string; images: { url: string }[] }[]).map((property) => (
               <DataTableRow key={property.id}>
                 <DataTableCell>
                   <div className="flex items-center gap-3">
