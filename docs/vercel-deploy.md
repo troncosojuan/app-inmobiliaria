@@ -17,7 +17,7 @@ export DATABASE_URL="postgresql://..."   # o usá .env
 pnpm db:push
 ```
 
-O desde el paquete `db`:
+O desde el paquete `db`: 
 
 ```bash
 cd packages/db && pnpm db:push
