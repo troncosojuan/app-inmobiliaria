@@ -51,7 +51,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  const propertyRoutes: MetadataRoute.Sitemap = properties.map((p) => ({
+  const propertyRoutes: MetadataRoute.Sitemap = (properties as { slug: string; updatedAt: Date }[]).map((p) => ({
     url: `${baseUrl}/propiedades/${p.slug}`,
     lastModified: p.updatedAt,
     changeFrequency: "weekly" as const,
