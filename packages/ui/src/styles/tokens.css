@@ -1,0 +1,60 @@
+/**
+ * Design Tokens - Sistema de colores y variables base.
+ *
+ * Jerarquía:
+ *   1. Platform tokens (fijos, identidad de la plataforma)
+ *   2. Semantic tokens (background, foreground, etc. - estos los define cada app)
+ *   3. Tenant tokens (--tenant-primary, etc. - inyectados dinámicamente por tenant)
+ *
+ * Los apps importan este archivo y pueden sobrescribir variables.
+ */
+
+@layer base {
+  :root {
+    /* ─── Radius ─── */
+    --radius: 0.75rem;
+
+    /* ─── Base semantic tokens (Light theme) ─── */
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    /* Platform blue as primary */
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+
+    /* ─── Tenant override placeholders ─── */
+    --tenant-primary: #1e40af;
+    --tenant-secondary: #f59e0b;
+    --tenant-accent: #10b981;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+}

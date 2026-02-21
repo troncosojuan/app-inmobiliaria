@@ -1,0 +1,25 @@
+---
+description: Contexto general del proyecto - plataforma SaaS multi-tenant para inmobiliarias argentinas
+alwaysApply: true
+---
+
+# Proyecto App Inmobiliaria
+
+Plataforma SaaS multi-tenant que genera sitios web para inmobiliarias argentinas. No es solo un website builder sino un sistema operativo para la inmobiliaria (back-office, CRM, calculadoras, automatizaciones).
+
+## Stack
+
+- **Monorepo**: Turborepo + pnpm workspaces
+- **Frontend**: Next.js 15 (App Router), TypeScript, Tailwind CSS, Server Components
+- **DB**: SQLite (dev) / PostgreSQL (prod), Prisma ORM
+- **Auth**: Auth.js v5 beta con Credentials + JWT
+- **Paquetes compartidos**: `packages/api` (servicios), `packages/ui` (componentes), `packages/types` (tipos/constantes), `packages/db` (Prisma)
+
+## Apps
+
+- `apps/web` (puerto 3000): Sitio público + dashboard del tenant
+- `apps/admin` (puerto 3001): Panel de administración de la plataforma
+
+## Idioma
+
+Siempre responder en español. El código usa nombres en inglés pero labels/UI en español argentino.

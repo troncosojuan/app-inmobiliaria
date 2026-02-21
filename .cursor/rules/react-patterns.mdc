@@ -1,0 +1,37 @@
+---
+description: Patrones de React y Next.js del proyecto
+globs: "**/*.tsx"
+alwaysApply: false
+---
+
+# Patrones React / Next.js
+
+## Formularios
+
+- React Hook Form + Zod para validación
+- Componentes de formulario: `FormInput`, `FormSelect`, `FormTextarea`, `FormLabel`, `FormError` de `@app-inmobiliaria/ui`
+- Hook `useFormSubmit` para submit con manejo de loading/error/redirect
+
+## Animaciones
+
+- `framer-motion`: `FadeUp`, `StaggerList`, `StaggerItem`, `ScrollReveal`, `AnimatedCounter` desde `@/components/motion`
+- `Atropos`: efecto 3D parallax en cards destacadas
+- `@formkit/auto-animate`: `useAutoAnimate` para listas (Kanban)
+
+## Componentes clave
+
+- `PropertyBadges`: badges dinámicos (Nueva, Destacada, Precio reducido)
+- `FavoriteButton`: botón corazón con `useFavorites` hook (localStorage)
+- `SimilarProperties`: carousel de propiedades relacionadas
+- `CommandPalette`: Ctrl+K para navegación rápida (cmdk)
+- `ChatWidget`: chatbot de búsqueda de propiedades (gated por plan)
+
+## Notificaciones
+
+Usar `toast` de `sonner`, no alert/confirm nativos.
+
+## Estado
+
+- Server: TanStack Query (React Query)
+- URL: `nuqs` para filtros en URL
+- Local: `useFavorites` con localStorage

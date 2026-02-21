@@ -1,0 +1,29 @@
+---
+description: Sistema multi-tenant y feature gating
+globs: apps/web/**/*.ts, apps/web/**/*.tsx
+alwaysApply: false
+---
+
+# Multi-Tenant
+
+## Resolución de tenant
+
+- Middleware en `apps/web/src/middleware.ts` resuelve tenant por slug o custom domain
+- `getTenant()` en `@/lib/tenant` retorna tenant con plan incluido (puede ser null)
+- Siempre verificar `if (!tenant) return notFound()` en Server Components
+
+## Feature Gating
+
+Cada plan tiene features booleanas: `analytics`, `aiFeatures`, `bulkUpload`, `crm`, `seoAdvanced`, `customPages`, `customDomain`, `ipcAdjustment`, `chatAutomation`, `prioritySupport`
+
+- Server-side: `FeatureGateService.checkFeature(tenantId, "featureName")`
+- Client-side: `<FeatureGate enabled={hasFeature} featureName="Nombre">...</FeatureGate>`
+
+## Branding por tenant
+
+Colores dinámicos via CSS variables: `--tenant-primary`, `--tenant-secondary`, `--tenant-accent`
+Definidos en el root layout basados en los colores del tenant.
+
+## Dark mode
+
+Toggle light/dark/system con persistencia en localStorage. Script anti-FOUC en `<head>`.

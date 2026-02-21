@@ -1,0 +1,11 @@
+import { NextResponse } from "next/server";
+import { TenantService, updateTenantSchema } from "@app-inmobiliaria/api";
+import { apiHandler, requireTenantAdmin, validateBody } from "@/lib/api-helpers";
+
+export const PATCH = apiHandler(async (request) => {
+  const user = await requireTenantAdmin();
+  const body = await request.json();
+  const data = validateBody(updateTenantSchema, body);
+  const tenant = await TenantService.update(user.tenantId, data as Record<string, unknown>);
+  return NextResponse.json(tenant);
+});

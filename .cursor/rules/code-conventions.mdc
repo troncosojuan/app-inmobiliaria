@@ -1,0 +1,34 @@
+---
+description: Convenciones de código y patrones del proyecto
+alwaysApply: true
+---
+
+# Convenciones de Código
+
+## Imports
+
+Usar path aliases, nunca imports relativos largos (`../../`):
+- `@/` para imports dentro de cada app (apps/web, apps/admin)
+- `@app-inmobiliaria/api` para servicios y lógica de negocio
+- `@app-inmobiliaria/ui` para componentes compartidos
+- `@app-inmobiliaria/types` para tipos y constantes
+- `@app-inmobiliaria/db` para Prisma client
+
+## Server Components vs Client Components
+
+- NO pasar funciones/componentes React como props de Server a Client Components
+- Para íconos Lucide: pasar `iconName: "Building2"` (string) y resolver dentro del Client Component con un mapa
+- Usar `serialize()` de `packages/api` para datos de Prisma con tipos `Decimal` antes de enviar a Client Components
+- Siempre agregar null-check para `getTenant()` antes de acceder a sus propiedades
+
+## Color System
+
+ColorKey válidos: `"blue" | "emerald" | "violet" | "amber" | "pink" | "red" | "slate"`
+- NO usar: "green", "purple", "orange", "yellow", "cyan"
+- Importar `ICON_COLORS`, `BADGE_COLORS`, `type ColorKey` desde `@app-inmobiliaria/ui`
+
+## Componentes UI
+
+- `PageHeader`: props son `title` y `description` (NO `subtitle`)
+- `FeatureGate`: prop es `enabled` (NO `allowed`)
+- `StatCard`: prop `colorScheme` acepta solo `ColorKey`

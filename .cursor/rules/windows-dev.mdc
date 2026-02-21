@@ -1,0 +1,20 @@
+---
+description: Consideraciones para desarrollo en Windows
+alwaysApply: true
+---
+
+# Desarrollo en Windows
+
+## Problemas conocidos
+
+- **Prisma DLL lock**: Si `prisma generate` falla con EPERM, matar procesos Node primero: `taskkill //F //IM node.exe`
+- **ESM en Tailwind configs**: Usar `createRequire(import.meta.url)` en vez de `require.resolve()` directo
+- **Cache corrupta**: Si hay errores de `routes-manifest.json`, borrar `.next/` y reiniciar
+
+## Comandos
+
+- Dev: `npm run dev` (corre ambas apps via Turborepo)
+- Build: `npx turbo build --filter=@app-inmobiliaria/web`
+- Seed: `pnpm --filter @app-inmobiliaria/db seed`
+- Matar todo: `taskkill //F //IM node.exe`
+- Limpiar cache: `rm -rf apps/web/.next apps/admin/.next`

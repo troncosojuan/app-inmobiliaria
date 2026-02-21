@@ -1,0 +1,28 @@
+---
+description: Patrones para servicios de API y rutas
+globs: packages/api/**/*.ts, apps/*/src/app/api/**/*.ts
+alwaysApply: false
+---
+
+# Servicios y API Routes
+
+## Servicios (packages/api)
+
+- Clases estáticas: `PropertyService.search()`, `TenantService.create()`
+- Siempre usar `serialize()` antes de retornar datos de Prisma (convierte Decimal a number)
+- Usar `ensureExists()` para validar existencia antes de update/delete
+- Usar `pickFields()` para filtrar campos actualizables
+- `next-auth` es peerDependency en packages/api (no directa)
+
+## API Routes (apps/web, apps/admin)
+
+- Usar `apiHandler` wrapper para manejo consistente de errores
+- Usar `validateBody(schema, body)` con schemas Zod para validación
+- Helpers de auth: `requireAuth()`, `requireTenantUser()`, `requireTenantAdmin()`, `requirePlatformAdmin()`
+- Para feature gating: `FeatureGateService.checkFeature(tenantId, featureName)`
+
+## Métodos importantes
+
+- `DashboardService.getTenantStats()` (NO `getStats`)
+- `FeatureGateService.checkFeature()` (NO `canAccess`)
+- `PropertyService.getSimilar(tenantId, propertyId, limit)`

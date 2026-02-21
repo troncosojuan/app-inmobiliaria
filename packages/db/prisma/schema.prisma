@@ -1,0 +1,548 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// PLATFORM & MULTI-TENANCY
+// ============================================
+
+model Tenant {
+  id           String  @id @default(cuid())
+  name         String
+  slug         String  @unique
+  customDomain String? @unique
+  logo         String?
+  favicon      String?
+
+  primaryColor   String @default("#1e40af")
+  secondaryColor String @default("#f59e0b")
+  accentColor    String @default("#10b981")
+
+  email   String
+  phone   String?
+  address String?
+  city    String?
+  state   String?
+
+  whatsapp  String?
+  instagram String?
+  facebook  String?
+
+  templateSlug String @default("modern")
+
+  planId String
+  plan   Plan   @relation(fields: [planId], references: [id])
+
+  isActive Boolean @default(true)
+
+  stripeCustomerId     String?   @unique
+  stripeSubscriptionId String?   @unique
+  subscriptionStatus   String?
+  subscriptionStartDate DateTime?
+  subscriptionEndDate   DateTime?
+  trialEndsAt           DateTime?
+
+  users         User[]
+  properties    Property[]
+  leads         Lead[]
+  pages         CustomPage[]
+  apiKeys       ApiKey[]
+  subscriptions Subscription[]
+  webhooks      Webhook[]
+  searchAlerts    SearchAlert[]
+  portalChannels  PortalChannel[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([customDomain])
+}
+
+model Plan {
+  id       String  @id @default(cuid())
+  name     String
+  slug     String  @unique
+  price    Decimal
+  currency String  @default("ARS")
+
+  billingPeriod  String  @default("MONTHLY")
+  trialDays      Int     @default(0)
+
+  maxProperties  Int     @default(50)
+  maxUsers       Int     @default(3)
+  customDomain   Boolean @default(false)
+  analytics      Boolean @default(false)
+  aiFeatures     Boolean @default(false)
+  ipcAdjustment  Boolean @default(false)
+  chatAutomation Boolean @default(false)
+  crm            Boolean @default(false)
+  bulkUpload     Boolean @default(false)
+  seoAdvanced    Boolean @default(false)
+  customPages    Boolean @default(false)
+  prioritySupport      Boolean @default(false)
+  hidePlatformBranding Boolean @default(false)
+
+  stripePriceId String?
+
+  tenants       Tenant[]
+  subscriptions Subscription[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ============================================
+// USERS & AUTH
+// ============================================
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String?
+  passwordHash String
+  avatar       String?
+  role         UserRole @default(AGENT)
+
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id])
+
+  isVerified Boolean @default(false)
+  isActive   Boolean @default(true)
+
+  lastLoginAt DateTime?
+
+  properties      Property[]
+  assignedLeads   Lead[]
+  sessions        Session[]
+  assignedTasks   Task[]     @relation("TaskAssignee")
+  createdTasks    Task[]     @relation("TaskCreator")
+  activities      Activity[] @relation("ActivityCreator")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expires      DateTime
+
+  createdAt DateTime @default(now())
+}
+
+enum UserRole {
+  PLATFORM_ADMIN
+  TENANT_ADMIN
+  AGENT
+}
+
+// ============================================
+// PROPERTIES (INMUEBLES)
+// ============================================
+
+model Property {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  agentId String?
+  agent   User?   @relation(fields: [agentId], references: [id])
+
+  title       String
+  slug        String
+  description String
+
+  type      PropertyType
+  operation OperationType
+  status    PropertyStatus @default(ACTIVE)
+
+  price    Decimal
+  currency String  @default("USD")
+  expenses Decimal?
+
+  ipcBaseDate  DateTime?
+  ipcBaseIndex Decimal?
+
+  address      String
+  city         String
+  state        String
+  zipCode      String?
+  neighborhood String?
+  latitude     Float?
+  longitude    Float?
+
+  totalArea   Float?
+  coveredArea Float?
+  rooms       Int?
+  bedrooms    Int?
+  bathrooms   Int?
+  garages     Int?
+  floor       Int?
+  yearBuilt   Int?
+  orientation String?
+
+  amenities Json?
+
+  metaTitle       String?
+  metaDescription String?
+  virtualTourUrl  String?
+
+  isFeatured Boolean @default(false)
+
+  images       PropertyImage[]
+  leads        Lead[]
+  views        PropertyView[]
+  publications PortalPublication[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, slug])
+  @@index([tenantId, status])
+  @@index([tenantId, type, operation])
+  @@index([tenantId, isFeatured])
+  @@index([city, state])
+  @@index([price])
+}
+
+model PropertyView {
+  id         String   @id @default(cuid())
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  tenantId   String
+
+  sessionId  String?
+  referrer   String?
+  userAgent  String?
+
+  viewedAt   DateTime @default(now())
+
+  @@index([propertyId, viewedAt])
+  @@index([tenantId, viewedAt])
+}
+
+model PropertyImage {
+  id         String   @id @default(cuid())
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  url        String
+  alt        String?
+  order      Int      @default(0)
+  isPrimary  Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+
+  @@index([propertyId, order])
+}
+
+enum PropertyType {
+  HOUSE
+  APARTMENT
+  LAND
+  OFFICE
+  COMMERCIAL
+  WAREHOUSE
+  PH
+  COUNTRY_HOUSE
+  FARM
+}
+
+enum OperationType {
+  SALE
+  RENT
+  TEMPORARY
+}
+
+enum PropertyStatus {
+  ACTIVE
+  PAUSED
+  SOLD
+  RENTED
+  DRAFT
+}
+
+// ============================================
+// LEADS & CRM
+// ============================================
+
+model Lead {
+  id         String    @id @default(cuid())
+  tenantId   String
+  tenant     Tenant    @relation(fields: [tenantId], references: [id])
+  propertyId String?
+  property   Property? @relation(fields: [propertyId], references: [id])
+
+  assignedToId String?
+  assignedTo   User?   @relation(fields: [assignedToId], references: [id])
+
+  name    String
+  email   String
+  phone   String?
+  message String?
+  notes   String?
+
+  source         String?
+  status         LeadStatus @default(NEW)
+  estimatedValue Decimal?
+  convertedAt    DateTime?
+
+  tasks      Task[]
+  activities Activity[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId, status])
+  @@index([tenantId, createdAt])
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  IN_VISIT
+  OFFER
+  CONVERTED
+  LOST
+}
+
+// ============================================
+// CRM - TASKS & ACTIVITIES
+// ============================================
+
+model Task {
+  id       String @id @default(cuid())
+  tenantId String
+  leadId   String?
+  lead     Lead?  @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  assignedToId String?
+  assignedTo   User?  @relation("TaskAssignee", fields: [assignedToId], references: [id])
+  createdById  String
+  createdBy    User   @relation("TaskCreator", fields: [createdById], references: [id])
+
+  title       String
+  description String?
+  dueDate     DateTime?
+  priority    TaskPriority @default(MEDIUM)
+  status      TaskStatus   @default(PENDING)
+  completedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId, status])
+  @@index([tenantId, dueDate])
+  @@index([assignedToId, status])
+  @@index([leadId])
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model Activity {
+  id       String @id @default(cuid())
+  tenantId String
+  leadId   String
+  lead     Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation("ActivityCreator", fields: [userId], references: [id])
+
+  type    ActivityType
+  content String
+
+  createdAt DateTime @default(now())
+
+  @@index([leadId, createdAt])
+  @@index([tenantId, createdAt])
+}
+
+enum ActivityType {
+  NOTE
+  CALL
+  EMAIL
+  VISIT
+  STATUS_CHANGE
+  TASK_CREATED
+  TASK_COMPLETED
+}
+
+// ============================================
+// API KEYS (for public API)
+// ============================================
+
+model ApiKey {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  name      String
+  key       String  @unique
+  isActive  Boolean @default(true)
+  lastUsedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([key])
+  @@index([tenantId])
+}
+
+// ============================================
+// CUSTOM PAGES (for Pro+ plans)
+// ============================================
+
+model CustomPage {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  title   String
+  slug    String
+  content String
+
+  isPublished Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, slug])
+}
+
+// ============================================
+// BILLING & SUBSCRIPTIONS
+// ============================================
+
+model Subscription {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  planId   String
+  plan     Plan   @relation(fields: [planId], references: [id])
+
+  stripeSubscriptionId String?  @unique
+  stripePriceId        String?
+  status               String   @default("TRIAL")
+
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  cancelAtPeriodEnd  Boolean   @default(false)
+
+  amount   Decimal?
+  currency String   @default("ARS")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([status])
+}
+
+// ============================================
+// WEBHOOKS
+// ============================================
+
+model Webhook {
+  id       String  @id @default(cuid())
+  tenantId String
+  tenant   Tenant  @relation(fields: [tenantId], references: [id])
+
+  url      String
+  events   String
+  secret   String
+  isActive Boolean @default(true)
+
+  lastTriggeredAt DateTime?
+  lastStatusCode  Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([isActive])
+}
+
+// ============================================
+// SEARCH ALERTS
+// ============================================
+
+model SearchAlert {
+  id       String  @id @default(cuid())
+  tenantId String
+  tenant   Tenant  @relation(fields: [tenantId], references: [id])
+
+  email    String
+  filters  String
+  isActive Boolean @default(true)
+
+  lastNotifiedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([isActive])
+}
+
+// ============================================
+// PORTAL SYNDICATION
+// ============================================
+
+model PortalChannel {
+  id       String  @id @default(cuid())
+  tenantId String
+  tenant   Tenant  @relation(fields: [tenantId], references: [id])
+
+  portal   String
+  isActive Boolean @default(true)
+  config   String?
+
+  publications PortalPublication[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, portal])
+  @@index([tenantId])
+}
+
+model PortalPublication {
+  id         String  @id @default(cuid())
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  channelId  String
+  channel    PortalChannel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+
+  externalId  String?
+  status      String  @default("DRAFT")
+  lastSyncAt  DateTime?
+  errorMessage String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([propertyId, channelId])
+  @@index([channelId])
+  @@index([status])
+}
