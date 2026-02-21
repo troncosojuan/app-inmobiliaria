@@ -25,6 +25,9 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  outputFileTracingIncludes: {
+    "**": ["../../node_modules/.pnpm/@prisma+client*/**"],
+  },
   transpilePackages: [
     "@app-inmobiliaria/ui",
     "@app-inmobiliaria/db",
