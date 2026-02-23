@@ -2,18 +2,21 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import {
-  ChevronLeft, ChevronRight, Check, Loader2, Upload, X, GripVertical,
+  ChevronLeft, ChevronRight, Check, Loader2, Upload, X, GripVertical, Sparkles,
 } from "lucide-react";
 import {
   PROPERTY_TYPE_LABELS, OPERATION_TYPE_LABELS, ARGENTINA_PROVINCES,
 } from "@app-inmobiliaria/types";
 import { FormInput, FormLabel, FormSelect, FormTextarea } from "@app-inmobiliaria/ui";
 import Image from "next/image";
+import { NumberStepper } from "@/components/ui/number-stepper";
+import { AddressAutocomplete } from "@/components/ui/address-autocomplete";
+import { AmenityPicker } from "@/components/ui/amenity-picker";
 
 const formSchema = z.object({
   title: z.string().min(5, "Mínimo 5 caracteres").max(200),
@@ -35,7 +38,7 @@ const formSchema = z.object({
   garages: z.coerce.number().int().min(0).optional().or(z.literal("")),
   floor: z.coerce.number().int().optional().or(z.literal("")),
   yearBuilt: z.coerce.number().int().min(1800).max(2100).optional().or(z.literal("")),
-  amenities: z.string().optional(),
+  amenities: z.array(z.string()).default([]),
   status: z.string().default("DRAFT"),
   isFeatured: z.boolean().default(false),
   metaTitle: z.string().max(70, "Máximo 70 caracteres").optional().or(z.literal("")),
@@ -58,6 +61,34 @@ interface ImagePreview {
   preview: string;
 }
 
+function generateSeo(data: Partial<FormValues>): { metaTitle: string; metaDescription: string } {
+  const typeLabel = PROPERTY_TYPE_LABELS[data.type as keyof typeof PROPERTY_TYPE_LABELS] || data.type || "";
+  const opLabel = OPERATION_TYPE_LABELS[data.operation as keyof typeof OPERATION_TYPE_LABELS] || data.operation || "";
+  const location = [data.city, data.state].filter(Boolean).join(", ");
+  const rooms = data.rooms ? `${data.rooms} amb. ` : "";
+  const bedrooms = data.bedrooms ? `${data.bedrooms} dorm. ` : "";
+  const priceStr = data.price
+    ? `${data.currency === "USD" ? "USD" : "$"} ${Number(data.price).toLocaleString("es-AR")}`
+    : "";
+
+  const metaTitle = [typeLabel, opLabel ? `en ${opLabel.toLowerCase()}` : "", location ? `— ${location}` : ""]
+    .filter(Boolean)
+    .join(" ")
+    .slice(0, 70);
+
+  const descParts = [
+    typeLabel,
+    rooms + bedrooms ? `de ${(rooms + bedrooms).trim()}` : "",
+    location ? `en ${location}` : "",
+    data.operation === "SALE" ? "en venta" : data.operation === "RENT" ? "en alquiler" : "",
+    priceStr ? `— ${priceStr}` : "",
+  ].filter(Boolean);
+
+  const metaDescription = descParts.join(" ").slice(0, 160);
+
+  return { metaTitle, metaDescription };
+}
+
 export function PropertyForm() {
   const router = useRouter();
   const [step, setStep] = useState(0);
@@ -71,12 +102,12 @@ export function PropertyForm() {
       title: "", description: "", type: "", operation: "",
       price: undefined as unknown as number, currency: "USD",
       address: "", city: "", state: "", neighborhood: "",
-      status: "DRAFT", isFeatured: false, amenities: "",
+      status: "DRAFT", isFeatured: false, amenities: [],
     },
     mode: "onChange",
   });
 
-  const { register, handleSubmit, formState: { errors }, watch, trigger, setValue } = form;
+  const { register, handleSubmit, formState: { errors }, watch, trigger, setValue, control } = form;
 
   const goNext = async () => {
     const currentFields = STEPS[step].fields;
@@ -131,14 +162,18 @@ export function PropertyForm() {
     setDragIdx(null);
   };
 
+  const handleGenerateSeo = () => {
+    const values = form.getValues();
+    const { metaTitle, metaDescription } = generateSeo(values);
+    setValue("metaTitle", metaTitle, { shouldValidate: true });
+    setValue("metaDescription", metaDescription, { shouldValidate: true });
+    toast.success("SEO generado");
+  };
+
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
 
     try {
-      const amenities = data.amenities
-        ? data.amenities.split(",").map((a) => a.trim()).filter(Boolean)
-        : [];
-
       const response = await fetch("/api/properties", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -153,7 +188,7 @@ export function PropertyForm() {
           garages: data.garages || null,
           floor: data.floor || null,
           yearBuilt: data.yearBuilt || null,
-          amenities,
+          amenities: data.amenities,
         }),
       });
 
@@ -216,6 +251,7 @@ export function PropertyForm() {
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="p-6">
+          {/* STEP 0 — Datos básicos */}
           {step === 0 && (
             <div className="grid gap-5 sm:grid-cols-2">
               <div className="sm:col-span-2">
@@ -262,11 +298,30 @@ export function PropertyForm() {
             </div>
           )}
 
+          {/* STEP 1 — Ubicación */}
           {step === 1 && (
             <div className="grid gap-5 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <FormLabel htmlFor="address">Dirección</FormLabel>
-                <FormInput id="address" {...register("address")} placeholder="Av. Santa Fe 1234" />
+                <Controller
+                  name="address"
+                  control={control}
+                  render={({ field }) => (
+                    <AddressAutocomplete
+                      id="address"
+                      value={field.value}
+                      onChange={field.onChange}
+                      onSelectAddress={({ address, city, state }) => {
+                        field.onChange(address);
+                        setValue("city", city, { shouldValidate: true });
+                        const normalizedState = ARGENTINA_PROVINCES.find(
+                          (p) => p.toLowerCase() === state.toLowerCase()
+                        ) || state;
+                        setValue("state", normalizedState, { shouldValidate: true });
+                      }}
+                    />
+                  )}
+                />
                 {errors.address && <p className={errorCls}>{errors.address.message}</p>}
               </div>
               <div>
@@ -291,47 +346,114 @@ export function PropertyForm() {
             </div>
           )}
 
+          {/* STEP 2 — Características */}
           {step === 2 && (
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3">
-              <div>
-                <FormLabel htmlFor="totalArea">Superficie total (m²)</FormLabel>
-                <FormInput id="totalArea" type="number" {...register("totalArea")} />
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                <div>
+                  <FormLabel htmlFor="totalArea">Superficie total (m²)</FormLabel>
+                  <FormInput id="totalArea" type="number" {...register("totalArea")} />
+                </div>
+                <div>
+                  <FormLabel htmlFor="coveredArea">Superficie cubierta (m²)</FormLabel>
+                  <FormInput id="coveredArea" type="number" {...register("coveredArea")} />
+                </div>
               </div>
+
               <div>
-                <FormLabel htmlFor="coveredArea">Superficie cubierta (m²)</FormLabel>
-                <FormInput id="coveredArea" type="number" {...register("coveredArea")} />
+                <p className="mb-3 text-sm font-medium text-foreground">Distribución</p>
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                  <Controller
+                    name="rooms"
+                    control={control}
+                    render={({ field }) => (
+                      <div>
+                        <FormLabel>Ambientes</FormLabel>
+                        <NumberStepper
+                          value={field.value as number | undefined}
+                          onChange={field.onChange}
+                          min={0}
+                          max={20}
+                        />
+                      </div>
+                    )}
+                  />
+                  <Controller
+                    name="bedrooms"
+                    control={control}
+                    render={({ field }) => (
+                      <div>
+                        <FormLabel>Dormitorios</FormLabel>
+                        <NumberStepper
+                          value={field.value as number | undefined}
+                          onChange={field.onChange}
+                          min={0}
+                          max={15}
+                        />
+                      </div>
+                    )}
+                  />
+                  <Controller
+                    name="bathrooms"
+                    control={control}
+                    render={({ field }) => (
+                      <div>
+                        <FormLabel>Baños</FormLabel>
+                        <NumberStepper
+                          value={field.value as number | undefined}
+                          onChange={field.onChange}
+                          min={0}
+                          max={10}
+                        />
+                      </div>
+                    )}
+                  />
+                  <Controller
+                    name="garages"
+                    control={control}
+                    render={({ field }) => (
+                      <div>
+                        <FormLabel>Cocheras</FormLabel>
+                        <NumberStepper
+                          value={field.value as number | undefined}
+                          onChange={field.onChange}
+                          min={0}
+                          max={10}
+                        />
+                      </div>
+                    )}
+                  />
+                </div>
               </div>
+
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                <div>
+                  <FormLabel htmlFor="floor">Piso</FormLabel>
+                  <FormInput id="floor" type="number" {...register("floor")} placeholder="Ej: 3" />
+                </div>
+                <div>
+                  <FormLabel htmlFor="yearBuilt">Año construcción</FormLabel>
+                  <FormInput id="yearBuilt" type="number" {...register("yearBuilt")} placeholder="2020" />
+                </div>
+              </div>
+
               <div>
-                <FormLabel htmlFor="rooms">Ambientes</FormLabel>
-                <FormInput id="rooms" type="number" min="0" {...register("rooms")} />
-              </div>
-              <div>
-                <FormLabel htmlFor="bedrooms">Dormitorios</FormLabel>
-                <FormInput id="bedrooms" type="number" min="0" {...register("bedrooms")} />
-              </div>
-              <div>
-                <FormLabel htmlFor="bathrooms">Baños</FormLabel>
-                <FormInput id="bathrooms" type="number" min="0" {...register("bathrooms")} />
-              </div>
-              <div>
-                <FormLabel htmlFor="garages">Cocheras</FormLabel>
-                <FormInput id="garages" type="number" min="0" {...register("garages")} />
-              </div>
-              <div>
-                <FormLabel htmlFor="floor">Piso</FormLabel>
-                <FormInput id="floor" type="number" {...register("floor")} />
-              </div>
-              <div>
-                <FormLabel htmlFor="yearBuilt">Año construcción</FormLabel>
-                <FormInput id="yearBuilt" type="number" {...register("yearBuilt")} placeholder="2020" />
-              </div>
-              <div className="sm:col-span-2 md:col-span-3">
-                <FormLabel htmlFor="amenities">Amenities (separados por coma)</FormLabel>
-                <FormInput id="amenities" {...register("amenities")} placeholder="Pileta, SUM, Gimnasio, Laundry" />
+                <FormLabel>Amenities</FormLabel>
+                <Controller
+                  name="amenities"
+                  control={control}
+                  render={({ field }) => (
+                    <AmenityPicker
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  )}
+                />
               </div>
             </div>
           )}
 
+          {/* STEP 3 — Imágenes */}
           {step === 3 && (
             <div className="space-y-4">
               <div
@@ -402,6 +524,7 @@ export function PropertyForm() {
             </div>
           )}
 
+          {/* STEP 4 — Publicar */}
           {step === 4 && (
             <div className="space-y-5">
               <div>
@@ -432,7 +555,17 @@ export function PropertyForm() {
               </div>
 
               <div className="rounded-lg border border-border bg-muted/30 p-4">
-                <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">SEO (opcional)</h4>
+                <div className="mb-3 flex items-center justify-between">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">SEO (opcional)</h4>
+                  <button
+                    type="button"
+                    onClick={handleGenerateSeo}
+                    className="flex items-center gap-1.5 rounded-md bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/20 transition-colors"
+                  >
+                    <Sparkles className="h-3.5 w-3.5" />
+                    Generar SEO
+                  </button>
+                </div>
                 <div className="space-y-3">
                   <div>
                     <FormLabel htmlFor="metaTitle">Título SEO</FormLabel>
