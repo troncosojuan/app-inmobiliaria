@@ -102,6 +102,7 @@ export function StaggerItem({ children, ...props }: HTMLMotionProps<"div"> & { c
     <m.div
       variants={fadeUp}
       transition={{ duration: 0.4, ease: EASE }}
+      style={{ touchAction: "pan-y" }}
       {...props}
     >
       {children}

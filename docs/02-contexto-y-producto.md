@@ -100,5 +100,5 @@ El seed crea:
 - Propiedades en distintos barrios de Buenos Aires
 
 **Credenciales de demo:**
-- Admin plataforma (3001): `admin@plataforma.com` / `admin123`
-- Admin tenant (3000): `admin@demo.com` / `demo123`
+- Admin plataforma (3001): `admin@platform.com` / `admin123`
+- Admin tenant (3000): `admin@demo-inmobiliaria.com` / `admin123`

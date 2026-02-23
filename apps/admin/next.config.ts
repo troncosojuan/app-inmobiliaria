@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
+  outputFileTracingIncludes: {
+    "**": ["../../node_modules/.pnpm/@prisma+client*/**"],
+  },
   transpilePackages: [
     "@app-inmobiliaria/ui",
     "@app-inmobiliaria/db",
@@ -14,4 +18,9 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  silent: !process.env.CI,
+  widenClientFileUpload: true,
+  disableLogger: true,
+  automaticVercelMonitors: true,
+});
