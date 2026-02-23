@@ -79,6 +79,11 @@
   body {
     @apply bg-background text-foreground antialiased;
   }
+
+  /* Permite scroll vertical al arrastrar sobre links en mobile (iOS Safari) */
+  a {
+    touch-action: pan-y;
+  }
 }
 
 @layer utilities {
