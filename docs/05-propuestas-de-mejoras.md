@@ -107,6 +107,48 @@ Mejoras concretas al código y arquitectura actual, priorizadas por impacto.
 **Propuesta**: GitHub Actions (lint → type-check → test → build en cada PR), deploy automático a Vercel, preview deployments.
 **Esfuerzo**: Bajo-Medio (2-3 horas).
 
+### 13. Página de edición de tenant en admin
+**Estado**: Bug — da 404
+**Problema**: `/tenants/[id]` no existe. El botón "Editar" en la lista de tenants lleva a una página inexistente.
+**Propuesta**: Crear página con formulario para editar todos los campos del tenant: nombre, slug, email, teléfono, ciudad, provincia, plan, colores, estado activo/inactivo.
+**Esfuerzo**: Medio (2-3 horas).
+
+### 14. Inputs numéricos sin flechitas
+**Estado**: Pendiente
+**Problema**: Los inputs type="number" muestran flechitas arriba/abajo nativas del browser, se ven mal.
+**Propuesta**: CSS global `input[type=number]::-webkit-inner-spin-button { display: none }`.
+**Esfuerzo**: Bajo (5 minutos).
+
+### 15. Formulario de propiedades mejorado (UX sin teclado)
+**Estado**: Pendiente
+**Feedback directo de inmobiliaria**: La carga tiene que ser casi sin teclado.
+**Propuesta**:
+- Dormitorios, baños, cocheras: componente NumberStepper (click +/-)
+- Dirección: autocompletado con Google Maps Places API
+- Amenities: buscador con checkboxes en vez de input libre
+- SEO: botón de AI para pregenerar título/descripción editable
+**Esfuerzo**: Alto (1-2 días).
+
+### 16. Cotización del dólar en dashboard
+**Estado**: Pendiente
+**Propuesta**: Widget pequeño en el header/sidebar del dashboard con USD oficial, blue y MEP actualizado. API gratuita dolarapi.com, sin key requerida.
+**Esfuerzo**: Bajo (2-3 horas).
+
+### 17. Buscador y filtros en tablas del admin
+**Estado**: Pendiente
+**Propuesta**: Agregar input de búsqueda y filtros básicos en las tablas de propiedades, leads y usuarios del dashboard. Client-side filtering con los datos ya cargados.
+**Esfuerzo**: Medio (3-4 horas).
+
+### 18. Primer login fuerza cambio de contraseña
+**Estado**: Pendiente
+**Propuesta**: Flag `mustChangePassword` en modelo User. Al crear un usuario desde el admin, se activa. En el primer login redirige a `/cambiar-password` antes de entrar al dashboard.
+**Esfuerzo**: Medio (2-3 horas).
+
+### 19. Templates funcionales (hotplug global)
+**Estado**: Bug — cambiar template no aplica ningún cambio visual
+**Propuesta**: Revisar el sistema de templateSlug en el tenant. El template elegido debe aplicarse a nivel global en todo el layout público del tenant: navbar, hero, cards, footer. Implementar al menos 2-3 templates distintos.
+**Esfuerzo**: Alto (2-3 días).
+
 ---
 
 ## ✅ Ya implementado (movido de pendiente)
@@ -122,3 +164,5 @@ Estas mejoras ya fueron implementadas:
 - ~~Feature flags~~ → FeatureGateService + componentes visuales de gating
 - ~~Refactor del design system~~ → FormInput, color schemes centralizados, DataTable compartido
 - ~~Error handling en API~~ → apiHandler, ApiError, validateBody en todas las routes
+- ~~Monitoreo y observabilidad~~ → Sentry integrado en apps/web y apps/admin (2026-02-23)
+- ~~Responsive mobile scroll~~ → Fix touch-action en StaggerList, StaggerItem y Atropos (2026-02-23)
