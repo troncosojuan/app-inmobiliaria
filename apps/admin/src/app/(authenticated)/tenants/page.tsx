@@ -75,7 +75,14 @@ export default async function TenantsPage() {
                   <Link href={`/tenants/${tenant.id}`} className="rounded-lg border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted transition-colors">
                     Editar
                   </Link>
-                  <a href={`http://localhost:3000?tenant=${tenant.slug}`} target="_blank" rel="noopener noreferrer" className="rounded-lg border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted transition-colors">
+                  <a
+                    href={process.env.PLATFORM_DOMAIN
+                      ? `https://${tenant.slug}.${process.env.PLATFORM_DOMAIN}`
+                      : `http://localhost:3000?tenant=${tenant.slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded-lg border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted transition-colors"
+                  >
                     <ExternalLink className="h-3 w-3" />
                   </a>
                 </div>

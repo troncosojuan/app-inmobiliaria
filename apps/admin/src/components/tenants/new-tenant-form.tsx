@@ -156,19 +156,37 @@ export function NewTenantForm({ plans }: { plans: Plan[] }) {
             { id: "accentColor" as const, label: "Acento" },
           ].map((color) => (
             <div key={color.id}>
-              <FormLabel htmlFor={`nt-${color.id}`}>{color.label}</FormLabel>
+              <FormLabel htmlFor={`nt-${color.id}-text`}>{color.label}</FormLabel>
               <div className="flex items-center gap-2">
+                <label
+                  htmlFor={`nt-${color.id}`}
+                  className="h-10 w-12 shrink-0 cursor-pointer rounded-lg border border-input overflow-hidden"
+                  style={{ backgroundColor: watch(color.id) }}
+                >
+                  <input
+                    type="color"
+                    id={`nt-${color.id}`}
+                    {...register(color.id)}
+                    className="sr-only"
+                  />
+                </label>
                 <input
-                  type="color"
-                  id={`nt-${color.id}`}
-                  {...register(color.id)}
-                  className="h-10 w-12 cursor-pointer rounded-lg border border-input p-1"
-                />
-                <input
+                  id={`nt-${color.id}-text`}
                   type="text"
                   value={watch(color.id)}
-                  readOnly
-                  className="h-10 flex-1 rounded-lg border border-input bg-muted px-3 font-mono text-sm text-muted-foreground"
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setValue(color.id, val);
+                  }}
+                  onBlur={(e) => {
+                    const val = e.target.value;
+                    if (!/^#[0-9A-Fa-f]{6}$/.test(val)) {
+                      setValue(color.id, watch(color.id));
+                    }
+                  }}
+                  placeholder="#000000"
+                  className="h-10 flex-1 rounded-lg border border-input bg-background px-3 font-mono text-sm"
+                  maxLength={7}
                 />
               </div>
             </div>
