@@ -12,7 +12,16 @@ export class PropertyService {
       status: "ACTIVE",
     };
 
-    if (filters.type) where.type = filters.type;
+    if (filters.types) {
+      const typeList = filters.types.split(",").filter(Boolean);
+      if (typeList.length === 1) {
+        where.type = typeList[0];
+      } else if (typeList.length > 1) {
+        where.type = { in: typeList };
+      }
+    } else if (filters.type) {
+      where.type = filters.type;
+    }
     if (filters.operation) where.operation = filters.operation;
     if (filters.city) where.city = { contains: filters.city };
     if (filters.state) where.state = filters.state;

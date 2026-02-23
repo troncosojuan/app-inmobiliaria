@@ -1,19 +1,61 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { Loader2, Save, Trash2, Upload, GripVertical } from "lucide-react";
+import { useForm, Controller } from "react-hook-form";
+import { Loader2, Save, Trash2, Upload, GripVertical, Sparkles } from "lucide-react";
 import {
   PROPERTY_TYPE_LABELS, OPERATION_TYPE_LABELS, ARGENTINA_PROVINCES,
 } from "@app-inmobiliaria/types";
 import { FormInput, FormLabel, FormSelect, FormTextarea, FormSection } from "@app-inmobiliaria/ui";
 import Image from "next/image";
 import { useFormSubmit } from "@/hooks/use-form-submit";
+import { NumberStepper } from "@/components/ui/number-stepper";
+import { AddressAutocomplete } from "@/components/ui/address-autocomplete";
+import { AmenityPicker } from "@/components/ui/amenity-picker";
+import { toast } from "sonner";
 
 import type { PropertyBase } from "@app-inmobiliaria/types";
 
 interface PropertyEditFormProps {
   property: PropertyBase & { _count?: { leads: number } };
+}
+
+function generateSeo(data: {
+  title?: string;
+  type?: string;
+  operation?: string;
+  city?: string;
+  state?: string;
+  rooms?: number;
+  bedrooms?: number;
+  price?: number;
+  currency?: string;
+}): { metaTitle: string; metaDescription: string } {
+  const typeLabel = PROPERTY_TYPE_LABELS[data.type as keyof typeof PROPERTY_TYPE_LABELS] || data.type || "";
+  const opLabel = OPERATION_TYPE_LABELS[data.operation as keyof typeof OPERATION_TYPE_LABELS] || data.operation || "";
+  const location = [data.city, data.state].filter(Boolean).join(", ");
+  const rooms = data.rooms ? `${data.rooms} amb. ` : "";
+  const bedrooms = data.bedrooms ? `${data.bedrooms} dorm. ` : "";
+  const priceStr = data.price
+    ? `${data.currency === "USD" ? "USD" : "$"} ${Number(data.price).toLocaleString("es-AR")}`
+    : "";
+
+  const metaTitle = [typeLabel, opLabel ? `en ${opLabel.toLowerCase()}` : "", location ? `— ${location}` : ""]
+    .filter(Boolean)
+    .join(" ")
+    .slice(0, 70);
+
+  const descParts = [
+    typeLabel,
+    rooms + bedrooms ? `de ${(rooms + bedrooms).trim()}` : "",
+    location ? `en ${location}` : "",
+    data.operation === "SALE" ? "en venta" : data.operation === "RENT" ? "en alquiler" : "",
+    priceStr ? `— ${priceStr}` : "",
+  ].filter(Boolean);
+
+  const metaDescription = descParts.join(" ").slice(0, 160);
+
+  return { metaTitle, metaDescription };
 }
 
 export function PropertyEditForm({ property }: PropertyEditFormProps) {
@@ -43,10 +85,8 @@ export function PropertyEditForm({ property }: PropertyEditFormProps) {
     redirect: "/dashboard/propiedades",
     transform: (data) => {
       const d = data as Record<string, unknown>;
-      const amenities = typeof d.amenities === "string"
-        ? d.amenities.split(",").map((a: string) => a.trim()).filter(Boolean)
-        : [];
-      return { ...d, amenities };
+      // amenities is already an array from AmenityPicker
+      return { ...d };
     },
   });
 
@@ -57,7 +97,7 @@ export function PropertyEditForm({ property }: PropertyEditFormProps) {
     redirect: "/dashboard/propiedades",
   });
 
-  const { register, handleSubmit } = useForm({
+  const { register, handleSubmit, setValue, getValues, control } = useForm({
     defaultValues: {
       title: property.title,
       description: property.description || "",
@@ -78,7 +118,7 @@ export function PropertyEditForm({ property }: PropertyEditFormProps) {
       garages: property.garages || undefined,
       floor: property.floor || undefined,
       yearBuilt: property.yearBuilt || undefined,
-      amenities: (property.amenities || []).join(", "),
+      amenities: (property.amenities || []) as string[],
       status: property.status,
       isFeatured: property.isFeatured,
       metaTitle: property.metaTitle || "",
@@ -111,6 +151,24 @@ export function PropertyEditForm({ property }: PropertyEditFormProps) {
   const handleDelete = async () => {
     if (!confirm("¿Seguro que querés eliminar esta propiedad? Esta acción no se puede deshacer.")) return;
     await deleteProperty({});
+  };
+
+  const handleGenerateSeo = () => {
+    const values = getValues();
+    const { metaTitle, metaDescription } = generateSeo({
+      title: values.title as string,
+      type: values.type as string,
+      operation: values.operation as string,
+      city: values.city as string,
+      state: values.state as string,
+      rooms: values.rooms as number | undefined,
+      bedrooms: values.bedrooms as number | undefined,
+      price: values.price as number | undefined,
+      currency: values.currency as string,
+    });
+    setValue("metaTitle", metaTitle);
+    setValue("metaDescription", metaDescription);
+    toast.success("SEO generado");
   };
 
   return (
@@ -159,7 +217,25 @@ export function PropertyEditForm({ property }: PropertyEditFormProps) {
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2">
             <FormLabel htmlFor="edit-addr">Dirección</FormLabel>
-            <FormInput id="edit-addr" {...register("address")} />
+            <Controller
+              name="address"
+              control={control}
+              render={({ field }) => (
+                <AddressAutocomplete
+                  id="edit-addr"
+                  value={field.value as string}
+                  onChange={field.onChange}
+                  onSelectAddress={({ address, city, state }) => {
+                    field.onChange(address);
+                    setValue("city", city);
+                    const normalizedState = ARGENTINA_PROVINCES.find(
+                      (p) => p.toLowerCase() === state.toLowerCase()
+                    ) || state;
+                    setValue("state", normalizedState);
+                  }}
+                />
+              )}
+            />
           </div>
           <div>
             <FormLabel htmlFor="edit-city">Ciudad</FormLabel>
@@ -181,16 +257,96 @@ export function PropertyEditForm({ property }: PropertyEditFormProps) {
       </FormSection>
 
       <FormSection title="Características">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-          <div><FormLabel htmlFor="edit-ta">Sup. total (m²)</FormLabel><FormInput id="edit-ta" type="number" {...register("totalArea")} /></div>
-          <div><FormLabel htmlFor="edit-ca">Sup. cubierta (m²)</FormLabel><FormInput id="edit-ca" type="number" {...register("coveredArea")} /></div>
-          <div><FormLabel htmlFor="edit-rooms">Ambientes</FormLabel><FormInput id="edit-rooms" type="number" {...register("rooms")} /></div>
-          <div><FormLabel htmlFor="edit-bed">Dormitorios</FormLabel><FormInput id="edit-bed" type="number" {...register("bedrooms")} /></div>
-          <div><FormLabel htmlFor="edit-bath">Baños</FormLabel><FormInput id="edit-bath" type="number" {...register("bathrooms")} /></div>
-          <div><FormLabel htmlFor="edit-garage">Cocheras</FormLabel><FormInput id="edit-garage" type="number" {...register("garages")} /></div>
-          <div className="sm:col-span-2 md:col-span-3">
-            <FormLabel htmlFor="edit-amen">Amenities</FormLabel>
-            <FormInput id="edit-amen" {...register("amenities")} />
+        <div className="space-y-5">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <FormLabel htmlFor="edit-ta">Sup. total (m²)</FormLabel>
+              <FormInput id="edit-ta" type="number" {...register("totalArea")} />
+            </div>
+            <div>
+              <FormLabel htmlFor="edit-ca">Sup. cubierta (m²)</FormLabel>
+              <FormInput id="edit-ca" type="number" {...register("coveredArea")} />
+            </div>
+          </div>
+
+          <div>
+            <p className="mb-3 text-sm font-medium text-foreground">Distribución</p>
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+              <Controller
+                name="rooms"
+                control={control}
+                render={({ field }) => (
+                  <div>
+                    <FormLabel>Ambientes</FormLabel>
+                    <NumberStepper
+                      value={field.value as number | undefined}
+                      onChange={field.onChange}
+                      min={0}
+                      max={20}
+                    />
+                  </div>
+                )}
+              />
+              <Controller
+                name="bedrooms"
+                control={control}
+                render={({ field }) => (
+                  <div>
+                    <FormLabel>Dormitorios</FormLabel>
+                    <NumberStepper
+                      value={field.value as number | undefined}
+                      onChange={field.onChange}
+                      min={0}
+                      max={15}
+                    />
+                  </div>
+                )}
+              />
+              <Controller
+                name="bathrooms"
+                control={control}
+                render={({ field }) => (
+                  <div>
+                    <FormLabel>Baños</FormLabel>
+                    <NumberStepper
+                      value={field.value as number | undefined}
+                      onChange={field.onChange}
+                      min={0}
+                      max={10}
+                    />
+                  </div>
+                )}
+              />
+              <Controller
+                name="garages"
+                control={control}
+                render={({ field }) => (
+                  <div>
+                    <FormLabel>Cocheras</FormLabel>
+                    <NumberStepper
+                      value={field.value as number | undefined}
+                      onChange={field.onChange}
+                      min={0}
+                      max={10}
+                    />
+                  </div>
+                )}
+              />
+            </div>
+          </div>
+
+          <div>
+            <FormLabel>Amenities</FormLabel>
+            <Controller
+              name="amenities"
+              control={control}
+              render={({ field }) => (
+                <AmenityPicker
+                  value={field.value as string[]}
+                  onChange={field.onChange}
+                />
+              )}
+            />
           </div>
         </div>
       </FormSection>
@@ -268,6 +424,16 @@ export function PropertyEditForm({ property }: PropertyEditFormProps) {
       </FormSection>
 
       <FormSection title="SEO y tour virtual" className="border-border bg-muted/30">
+        <div className="mb-3 flex justify-end">
+          <button
+            type="button"
+            onClick={handleGenerateSeo}
+            className="flex items-center gap-1.5 rounded-md bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/20 transition-colors"
+          >
+            <Sparkles className="h-3.5 w-3.5" />
+            Generar SEO
+          </button>
+        </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <FormLabel htmlFor="metaTitle">Título SEO</FormLabel>

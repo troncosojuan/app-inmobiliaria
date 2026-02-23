@@ -3,7 +3,7 @@
 Documento vivo de casos de prueba, bugs encontrados y feedback de uso real.
 Actualizar cada vez que se encuentra un comportamiento inesperado o se valida un flujo.
 
-> **Última actualización**: 2026-02-23
+> **Última actualización**: 2026-02-23 (UX formulario propiedades)
 
 ---
 
@@ -164,7 +164,11 @@ Actualizar cada vez que se encuentra un comportamiento inesperado o se valida un
 | 2026-02-23 | Analytics — hover en "leads por día" pinta el gráfico con mal color | Baja | ⏳ Pendiente |
 | 2026-02-23 | Templates — cambiar template no aplica ningún cambio visual | Alta | ⏳ Pendiente |
 | 2026-02-23 | IPC calculator — datepicker con diseño feo | Baja | ⏳ Pendiente |
-| 2026-02-23 | Inputs numéricos — tienen flechitas arriba/abajo, sacarlas | Baja | ⏳ Pendiente |
+| 2026-02-23 | Inputs numéricos — tienen flechitas arriba/abajo, sacarlas | Baja | ✅ Resuelto |
+| 2026-02-23 | Formulario propiedades — campos numéricos (amb/dorm/baños/coch) como texto | Alta | ✅ Resuelto → NumberStepper |
+| 2026-02-23 | Formulario propiedades — dirección sin autocompletado | Alta | ✅ Resuelto → AddressAutocomplete (georef) |
+| 2026-02-23 | Formulario propiedades — amenities como texto libre separado por coma | Alta | ✅ Resuelto → AmenityPicker |
+| 2026-02-23 | Formulario propiedades — SEO sin ayuda para generar | Media | ✅ Resuelto → botón "Generar SEO" |
 
 ---
 

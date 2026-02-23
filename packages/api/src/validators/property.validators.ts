@@ -5,6 +5,8 @@ export const propertyFiltersSchema = z.object({
     "HOUSE", "APARTMENT", "LAND", "OFFICE",
     "COMMERCIAL", "WAREHOUSE", "PH", "COUNTRY_HOUSE", "FARM",
   ]).optional(),
+  // Multi-select types: comma-separated string e.g. "HOUSE,PH"
+  types: z.string().optional(),
   operation: z.enum(["SALE", "RENT", "TEMPORARY"]).optional(),
   city: z.string().optional(),
   state: z.string().optional(),
