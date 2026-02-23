@@ -156,28 +156,47 @@ Actualizar cada vez que se encuentra un comportamiento inesperado o se valida un
 
 ## 4. Bugs registrados
 
-> Formato: **[FECHA] Título** — descripción, pasos para reproducir, severidad (Alta/Media/Baja)
-
 | Fecha | Descripción | Severidad | Estado |
 |-------|-------------|-----------|--------|
-| 2026-02-23 | Scroll vertical bloqueado en cards de propiedades en mobile | Baja | ✅ Resuelto |
+| 2026-02-23 | Scroll vertical bloqueado en cards mobile (StaggerItem/Atropos) | Baja | ✅ Resuelto |
+| 2026-02-23 | Admin `/tenants/[id]` da 404 — página de edición no implementada | Alta | ⏳ Pendiente |
+| 2026-02-23 | Sección colores de marca en crear tenant — diseño desacomodado | Media | ⏳ Pendiente |
+| 2026-02-23 | Analytics — hover en "leads por día" pinta el gráfico con mal color | Baja | ⏳ Pendiente |
+| 2026-02-23 | Templates — cambiar template no aplica ningún cambio visual | Alta | ⏳ Pendiente |
+| 2026-02-23 | IPC calculator — datepicker con diseño feo | Baja | ⏳ Pendiente |
+| 2026-02-23 | Inputs numéricos — tienen flechitas arriba/abajo, sacarlas | Baja | ⏳ Pendiente |
 
 ---
 
 ## 5. Feedback de uso real
 
-> Comportamientos inesperados, confusión del usuario, sugerencias surgidas del uso real.
-
 | Fecha | Quién | Observación | Acción |
 |-------|-------|-------------|--------|
-| | | | |
+| 2026-02-23 | Testing interno | Páginas admin sin implementar: usuarios, planes, analíticas, páginas, configuración | ⏳ Pendiente |
+| 2026-02-23 | Testing interno | Sección "consultas" en admin — solo muestra la consulta, sin acciones posibles | ⏳ Planificar |
+| 2026-02-23 | Testing interno | Sección "páginas" en admin — bajo valor para usuario promedio, reemplazar por templates precargados | ⏳ Idea futura |
+| 2026-02-23 | Testing interno | Sección "publicaciones" — falta implementación | ⏳ Pendiente |
+| 2026-02-23 | Feedback inmobiliaria | Carga de propiedades tiene que ser casi sin teclado — todo clicks | 🔴 Alta prioridad |
+| 2026-02-23 | Feedback inmobiliaria | Dirección: autocompletado con Google Maps API mientras escribe | 🔴 Alta prioridad |
+| 2026-02-23 | Feedback inmobiliaria | Cocheras, baños, dormitorios — inputs click (0,1,2,3...) no texto | 🔴 Alta prioridad |
+| 2026-02-23 | Feedback inmobiliaria | Amenities — buscador con checkbox para seleccionar | Media |
+| 2026-02-23 | Feedback inmobiliaria | SEO — AI que sugiera título/descripción precargada y editable | Media |
 
 ---
 
-## 6. Casos de uso no contemplados
-
-> Usos que el sistema no maneja bien o para los que no fue diseñado originalmente.
+## 6. Ideas y mejoras anotadas
 
 | Fecha | Descripción | Impacto | Prioridad |
 |-------|-------------|---------|-----------|
-| | | | |
+| 2026-02-23 | Auth: forzar cambio de contraseña en primer login | Seguridad | Media |
+| 2026-02-23 | Auth: login con Google | UX | Baja (futuro) |
+| 2026-02-23 | Toggle dark/light mode para visitantes del sitio público | UX | Media |
+| 2026-02-23 | Buscador y filtros en tablas de admin (propiedades, leads) | UX | Media |
+| 2026-02-23 | Sistema de notificaciones para admin y agentes | Operacional | Media |
+| 2026-02-23 | Logo de inmobiliaria en web pública | Branding | Alta |
+| 2026-02-23 | Hero con carrusel de imágenes o video corto | Visual | Baja (futuro) |
+| 2026-02-23 | Buscador en home: select con tipos de propiedad | UX | Alta |
+| 2026-02-23 | Tareas con sistema de alertas configurables y asignación a agentes | Operacional | Media |
+| 2026-02-23 | Cotización del dólar visible de forma permanente | Local AR | Alta |
+| 2026-02-23 | Migración de propiedades desde URL de web anterior (scraping + AI) | Onboarding | Media (futuro) |
+| 2026-02-23 | Templates: aplicar a nivel global como "hotplug" en toda la app | Core | Alta |
