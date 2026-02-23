@@ -91,6 +91,7 @@ export function StaggerList({ children, slow = false, ...props }: StaggerListPro
       animate="visible"
       variants={slow ? staggerContainerSlow : staggerContainer}
       {...props}
+      style={{ touchAction: "pan-y", ...props.style }}
     >
       {children}
     </m.div>
@@ -102,8 +103,8 @@ export function StaggerItem({ children, ...props }: HTMLMotionProps<"div"> & { c
     <m.div
       variants={fadeUp}
       transition={{ duration: 0.4, ease: EASE }}
-      style={{ touchAction: "pan-y" }}
       {...props}
+      style={{ touchAction: "pan-y", ...props.style }}
     >
       {children}
     </m.div>
