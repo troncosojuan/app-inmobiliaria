@@ -1,6 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalEnv": ["DATABASE_URL", "AUTH_SECRET", "PLATFORM_DOMAIN", "DEFAULT_TENANT", "NEXTAUTH_URL", "NEXTAUTH_SECRET"],
+  "globalEnv": ["DATABASE_URL", "AUTH_SECRET", "PLATFORM_DOMAIN", "DEFAULT_TENANT", "NEXTAUTH_URL", "NEXTAUTH_SECRET", "NEXT_PUBLIC_SENTRY_DSN", "SENTRY_AUTH_TOKEN"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
