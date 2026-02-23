@@ -1,0 +1,17 @@
+chat me gustaria armar una pagina que pueda generarte una pagina inmobiliaria. La idea es como armar algo que dependiendo el plan de la persona puede ponerle mas features a su pagina, editarla mas etc. enfocada a inmobiliarias y a usuarios de inmobiliarias. Un caso de uso seria, una inmobiliaria se presenta a la empresa y pide pasar toda su pagina web a una mejor con mas funcionalidades, que ellos o nosotros podamos darle algunos ejemplo y que se pueda ir acomodando muy facilmente, se coloca su logo, se usa una db con la info que quiern y listo
+
+que opinas antes de arrancar? La idea es tener control de esto, ya sea varias apps con distintas features, o no se que opinas. Con respecto a los diseño busco que sea competitiva con respecto a las otras paginas inmobiliarias (o'keefe, remax, mercadolibre entre otras)
+
+
+dentro de las featurees basicas tiene que tener, poder cargar inmuebles de manera muy facil, una buena conexcion con la db como para que las busquedas sean agiles, que sea rapida y accesible
+
+Tambien pensaba features mas avanzadas, como el caso de que por ejemplo una inmobiliaria nos contrata, tambien que tengamos la posibilidad de agregar automatizaciones a partir de chats, que tenga aumento por ipc y todo lo que tenga que ver con eso. Un control para los usuarios verificados de la pagina o un dashboard aparte. Cosas ai
+
+
+Mi idea siento que podria tener mucho exito con un buen marketing y facilidad del usuario
+
+entonces para recapitular la idea es hacer una pagina que cree paginas y dependiendo del plan que pague el usuario se le habilitan algunas cosas. Poder tener control de esas apps de manera de soporte y demas
+
+
+la idea es que las paginas que creemos tengan un sistema de diseño modular, colores predeterminados y algunos fijos. Como son todas las paginas inmobiliarias de argentina son la mayoria similares, creeria que manteniendo colores fijos y los colores de las paginas de los usuarios ya estamos.
+
