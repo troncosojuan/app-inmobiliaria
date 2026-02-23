@@ -44,7 +44,7 @@ export function middleware(request: NextRequest) {
     tenantSlug = hostname.split(".")[0];
   }
 
-  if (!tenantSlug && process.env.NODE_ENV === "development") {
+  if (!tenantSlug) {
     tenantSlug = url.searchParams.get("tenant");
   }
 
