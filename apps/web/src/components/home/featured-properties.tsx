@@ -77,6 +77,7 @@ function PropertyCard3D({
       rotateYMax={8}
       shadow={false}
       highlight={false}
+      rotateTouch={false}
     >
       <Link
         href={`/propiedades/${property.slug}`}
