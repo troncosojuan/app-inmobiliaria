@@ -67,7 +67,7 @@ export function SearchSection({ tenant, cities }: SearchSectionProps) {
               value={search}
               onChange={(value) => setSearch(value)}
               onSelectAddress={(data) => {
-                setSearch(data.address);
+                setSearch(data.address || data.city);
                 if (data.city) setCity(data.city);
               }}
               placeholder="Barrio, direccion..."
