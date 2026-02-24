@@ -22,6 +22,19 @@ interface PropertyGridProps {
 }
 
 export function PropertyGrid({ properties, tenant }: PropertyGridProps) {
+  const templateSlug = (tenant as { templateSlug?: string }).templateSlug || "modern";
+  const isClassic = templateSlug === "classic";
+  const isMinimal = templateSlug === "minimal";
+  const cardClass = isClassic
+    ? "group block overflow-hidden rounded-lg border bg-white shadow-sm transition-all duration-300 hover:shadow-lg"
+    : isMinimal
+      ? "group block overflow-hidden rounded-2xl border border-border/60 bg-card/80 shadow-none transition-all duration-300 hover:shadow-md"
+      : "group block overflow-hidden rounded-xl border bg-card shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1";
+  const priceClass = isClassic
+    ? "rounded-lg bg-white/90 px-3 py-1.5 text-lg font-bold text-foreground shadow backdrop-blur"
+    : isMinimal
+      ? "rounded-full bg-foreground/90 px-3 py-1.5 text-lg font-bold text-background shadow"
+      : "rounded-lg bg-slate-900/80 px-3 py-1.5 text-lg font-bold text-white backdrop-blur";
   if (properties.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-xl border bg-card py-16 text-center">
@@ -40,7 +53,7 @@ export function PropertyGrid({ properties, tenant }: PropertyGridProps) {
         <StaggerItem key={property.id}>
           <Link
             href={`/propiedades/${property.slug}`}
-            className="group block overflow-hidden rounded-xl border bg-card shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
+            className={cardClass}
           >
             <div className="relative aspect-[4/3] overflow-hidden bg-muted">
               {property.images[0] ? (
@@ -95,7 +108,7 @@ export function PropertyGrid({ properties, tenant }: PropertyGridProps) {
               </div>
 
               <div className="absolute bottom-3 left-3">
-                <span className="rounded-lg bg-slate-900/80 px-3 py-1.5 text-lg font-bold text-white backdrop-blur">
+                <span className={priceClass}>
                   {formatPrice(Number(property.price), property.currency)}
                 </span>
               </div>

@@ -3,6 +3,7 @@
 import { useState, useId } from "react";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
+import { AddressAutocomplete } from "@/components/ui/address-autocomplete";
 import type { TenantWithPlan } from "@/lib/tenant";
 
 interface SearchSectionProps {
@@ -61,13 +62,17 @@ export function SearchSection({ tenant, cities }: SearchSectionProps) {
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div className="sm:col-span-2 lg:col-span-1">
             <label htmlFor={`${id}-search`} className="mb-1.5 block text-xs font-medium text-muted-foreground">Buscar</label>
-            <input
+            <AddressAutocomplete
               id={`${id}-search`}
-              type="text"
-              placeholder="Barrio, dirección..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="h-11 w-full rounded-lg border border-input bg-muted/50 px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              onChange={(value) => setSearch(value)}
+              onSelectAddress={(data) => {
+                setSearch(data.address);
+                if (data.city) setCity(data.city);
+              }}
+              placeholder="Barrio, direccion..."
+              minChars={3}
+              inputClassName="h-11 w-full rounded-lg border border-input bg-muted/50 pl-9 pr-9 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
           </div>
 

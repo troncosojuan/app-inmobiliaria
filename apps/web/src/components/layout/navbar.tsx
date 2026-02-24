@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Menu, X, Phone, Mail, Heart } from "lucide-react";
 import { FavoritesNavIndicator } from "@/components/properties/favorites-nav-indicator";
 import type { TenantWithPlan } from "@/lib/tenant";
+import { ThemeToggle } from "@app-inmobiliaria/ui";
 
 interface NavPage {
   id: string;
@@ -16,19 +17,43 @@ interface NavPage {
 interface NavbarProps {
   tenant: TenantWithPlan | null;
   customPages?: NavPage[];
+  templateSlug?: string;
 }
 
 const EMPTY_PAGES: NavPage[] = [];
 
-export function Navbar({ tenant, customPages = EMPTY_PAGES }: NavbarProps) {
+export function Navbar({ tenant, customPages = EMPTY_PAGES, templateSlug = "modern" }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const name = tenant?.name || "Inmobiliaria";
+  const isClassic = templateSlug === "classic";
+  const isMinimal = templateSlug === "minimal";
+
+  const topBarClass = isClassic
+    ? "hidden border-b bg-white text-slate-700 sm:block"
+    : isMinimal
+      ? "hidden border-b border-transparent bg-transparent text-slate-600 sm:block"
+      : "hidden border-b bg-slate-900 text-white sm:block";
+  const navClass = isClassic
+    ? "border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/90"
+    : isMinimal
+      ? "border-b bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/80"
+      : "border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80";
+  const navLinkClass = isClassic
+    ? "rounded-lg px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-slate-100 hover:text-foreground"
+    : isMinimal
+      ? "rounded-lg px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+      : "rounded-lg px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted hover:text-foreground";
+  const mobileLinkClass = isClassic
+    ? "block rounded-lg px-3 py-2.5 text-base font-medium text-foreground hover:bg-slate-100"
+    : isMinimal
+      ? "block rounded-lg px-3 py-2.5 text-base font-medium text-foreground hover:bg-muted/60"
+      : "block rounded-lg px-3 py-2.5 text-base font-medium text-foreground hover:bg-muted";
 
   return (
     <header className="sticky top-0 z-50 w-full">
       {tenant && (
-        <div className="hidden border-b bg-slate-900 text-white sm:block">
+        <div className={topBarClass}>
           <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-1.5 text-xs">
             <div className="flex items-center gap-4">
               {tenant.phone && (
@@ -45,13 +70,15 @@ export function Navbar({ tenant, customPages = EMPTY_PAGES }: NavbarProps) {
               )}
             </div>
             {tenant.address && (
-              <span className="text-muted-foreground">{tenant.address}, {tenant.city}</span>
+              <span className={isClassic ? "text-slate-500" : "text-muted-foreground"}>
+                {tenant.address}, {tenant.city}
+              </span>
             )}
           </div>
         </div>
       )}
 
-      <nav className="border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
+      <nav className={navClass}>
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-3">
             {tenant?.logo ? (
@@ -68,16 +95,17 @@ export function Navbar({ tenant, customPages = EMPTY_PAGES }: NavbarProps) {
           </Link>
 
           <div className="hidden items-center gap-1 md:flex">
-            <NavLink href="/">Inicio</NavLink>
-            <NavLink href="/propiedades">Propiedades</NavLink>
-            <NavLink href="/venta">Venta</NavLink>
-            <NavLink href="/alquiler">Alquiler</NavLink>
-            <NavLink href="/mapa">Mapa</NavLink>
+            <NavLink href="/" className={navLinkClass}>Inicio</NavLink>
+            <NavLink href="/propiedades" className={navLinkClass}>Propiedades</NavLink>
+            <NavLink href="/venta" className={navLinkClass}>Venta</NavLink>
+            <NavLink href="/alquiler" className={navLinkClass}>Alquiler</NavLink>
+            <NavLink href="/mapa" className={navLinkClass}>Mapa</NavLink>
             {customPages.map((p) => (
-              <NavLink key={p.id} href={`/${p.slug}`}>{p.title}</NavLink>
+              <NavLink key={p.id} href={`/${p.slug}`} className={navLinkClass}>{p.title}</NavLink>
             ))}
-            <NavLink href="/contacto">Contacto</NavLink>
+            <NavLink href="/contacto" className={navLinkClass}>Contacto</NavLink>
             <FavoritesNavIndicator />
+            <ThemeToggle />
             {tenant?.whatsapp && (
               <a
                 href={`https://wa.me/${tenant.whatsapp.replace(/[^0-9]/g, "")}`}
@@ -104,23 +132,27 @@ export function Navbar({ tenant, customPages = EMPTY_PAGES }: NavbarProps) {
         </div>
 
         {isOpen && (
-          <div className="border-t bg-card md:hidden">
+          <div className={`border-t ${isClassic ? "bg-white" : isMinimal ? "bg-background" : "bg-card"} md:hidden`}>
             <div className="space-y-1 px-4 py-3">
-              <MobileNavLink href="/" onClick={() => setIsOpen(false)}>Inicio</MobileNavLink>
-              <MobileNavLink href="/propiedades" onClick={() => setIsOpen(false)}>Propiedades</MobileNavLink>
-              <MobileNavLink href="/venta" onClick={() => setIsOpen(false)}>Venta</MobileNavLink>
-              <MobileNavLink href="/alquiler" onClick={() => setIsOpen(false)}>Alquiler</MobileNavLink>
-              <MobileNavLink href="/mapa" onClick={() => setIsOpen(false)}>Mapa</MobileNavLink>
+              <MobileNavLink href="/" onClick={() => setIsOpen(false)} className={mobileLinkClass}>Inicio</MobileNavLink>
+              <MobileNavLink href="/propiedades" onClick={() => setIsOpen(false)} className={mobileLinkClass}>Propiedades</MobileNavLink>
+              <MobileNavLink href="/venta" onClick={() => setIsOpen(false)} className={mobileLinkClass}>Venta</MobileNavLink>
+              <MobileNavLink href="/alquiler" onClick={() => setIsOpen(false)} className={mobileLinkClass}>Alquiler</MobileNavLink>
+              <MobileNavLink href="/mapa" onClick={() => setIsOpen(false)} className={mobileLinkClass}>Mapa</MobileNavLink>
               {customPages.map((p) => (
-                <MobileNavLink key={p.id} href={`/${p.slug}`} onClick={() => setIsOpen(false)}>{p.title}</MobileNavLink>
+                <MobileNavLink key={p.id} href={`/${p.slug}`} onClick={() => setIsOpen(false)} className={mobileLinkClass}>{p.title}</MobileNavLink>
               ))}
-              <MobileNavLink href="/contacto" onClick={() => setIsOpen(false)}>Contacto</MobileNavLink>
-              <MobileNavLink href="/favoritos" onClick={() => setIsOpen(false)}>
+              <MobileNavLink href="/contacto" onClick={() => setIsOpen(false)} className={mobileLinkClass}>Contacto</MobileNavLink>
+              <MobileNavLink href="/favoritos" onClick={() => setIsOpen(false)} className={mobileLinkClass}>
                 <span className="flex items-center gap-2">
                   <Heart className="h-4 w-4" />
                   Favoritos
                 </span>
               </MobileNavLink>
+              <div className="flex items-center justify-between rounded-lg px-3 py-2.5 text-base font-medium text-foreground">
+                <span>Tema</span>
+                <ThemeToggle />
+              </div>
               {tenant?.whatsapp && (
                 <a
                   href={`https://wa.me/${tenant.whatsapp.replace(/[^0-9]/g, "")}`}
@@ -144,20 +176,30 @@ export function Navbar({ tenant, customPages = EMPTY_PAGES }: NavbarProps) {
   );
 }
 
-function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
+function NavLink({ href, children, className }: { href: string; children: React.ReactNode; className: string }) {
   return (
     <Link
       href={href}
-      className="rounded-lg px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted hover:text-foreground"
+      className={className}
     >
       {children}
     </Link>
   );
 }
 
-function MobileNavLink({ href, children, onClick }: { href: string; children: React.ReactNode; onClick: () => void }) {
+function MobileNavLink({
+  href,
+  children,
+  onClick,
+  className,
+}: {
+  href: string;
+  children: React.ReactNode;
+  onClick: () => void;
+  className: string;
+}) {
   return (
-    <Link href={href} onClick={onClick} className="block rounded-lg px-3 py-2.5 text-base font-medium text-foreground hover:bg-muted">
+    <Link href={href} onClick={onClick} className={className}>
       {children}
     </Link>
   );

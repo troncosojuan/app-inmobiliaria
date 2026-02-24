@@ -12,6 +12,7 @@ export default async function PublicLayout({
 }) {
   const tenant = await getTenant();
   if (!tenant) return notFound();
+  const templateSlug = (tenant as { templateSlug?: string }).templateSlug || "modern";
 
   const [hasChat, customPages] = await Promise.all([
     FeatureGateService.checkFeature(tenant.id, "aiFeatures"),
@@ -19,10 +20,10 @@ export default async function PublicLayout({
   ]);
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <Navbar tenant={tenant} customPages={customPages} />
+    <div className={`flex min-h-screen flex-col template-${templateSlug}`}>
+      <Navbar tenant={tenant} customPages={customPages} templateSlug={templateSlug} />
       <main className="flex-1">{children}</main>
-      <Footer tenant={tenant} />
+      <Footer tenant={tenant} templateSlug={templateSlug} />
       {hasChat && (
         <ChatWidget
           tenantName={tenant.name}

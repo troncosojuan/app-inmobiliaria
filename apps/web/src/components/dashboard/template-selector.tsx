@@ -58,11 +58,12 @@ function TemplatePreview({ slug, primary, secondary }: { slug: TemplateSlug; pri
 }
 
 export function TemplateSelector({ currentTemplate, primaryColor, secondaryColor }: TemplateSelectorProps) {
+  const [current, setCurrent] = useState(currentTemplate);
   const [selected, setSelected] = useState(currentTemplate);
   const [saving, setSaving] = useState(false);
 
   async function handleSave() {
-    if (selected === currentTemplate) return;
+    if (selected === current) return;
     setSaving(true);
     try {
       const res = await fetch("/api/tenant", {
@@ -71,6 +72,7 @@ export function TemplateSelector({ currentTemplate, primaryColor, secondaryColor
         body: JSON.stringify({ templateSlug: selected }),
       });
       if (!res.ok) throw new Error();
+      setCurrent(selected);
       toast.success("Plantilla actualizada. Recargá tu sitio para ver los cambios.");
     } catch {
       toast.error("Error al guardar la plantilla");
@@ -112,7 +114,7 @@ export function TemplateSelector({ currentTemplate, primaryColor, secondaryColor
                 </div>
               </div>
 
-              {currentTemplate === tpl.slug && (
+              {current === tpl.slug && (
                 <span className="mt-3 inline-block rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
                   Actual
                 </span>
@@ -126,11 +128,11 @@ export function TemplateSelector({ currentTemplate, primaryColor, secondaryColor
         <button
           type="button"
           onClick={handleSave}
-          disabled={saving || selected === currentTemplate}
+          disabled={saving || selected === current}
           className="flex items-center gap-2 rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:opacity-50"
         >
           {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-          {selected === currentTemplate ? "Sin cambios" : "Aplicar plantilla"}
+          {selected === current ? "Sin cambios" : "Aplicar plantilla"}
         </button>
       </div>
     </div>

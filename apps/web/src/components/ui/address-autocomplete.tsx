@@ -3,20 +3,13 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Loader2, MapPin } from "lucide-react";
 
-interface GeorefDireccion {
-  nomenclatura: string;
-  calle: { nombre: string };
-  altura: { valor: number } | null;
-  localidad_censal: { nombre: string } | null;
-  municipio: { nombre: string } | null;
-  provincia: { nombre: string };
-}
 
 interface Suggestion {
   label: string;
   address: string;
   city: string;
   state: string;
+  neighborhood?: string;
 }
 
 interface AddressAutocompleteProps {
@@ -25,6 +18,9 @@ interface AddressAutocompleteProps {
   onChange: (value: string) => void;
   onSelectAddress?: (data: { address: string; city: string; state: string; neighborhood?: string }) => void;
   placeholder?: string;
+  inputClassName?: string;
+  containerClassName?: string;
+  minChars?: number;
 }
 
 function debounce<T extends (...args: Parameters<T>) => void>(fn: T, delay: number) {
@@ -35,32 +31,6 @@ function debounce<T extends (...args: Parameters<T>) => void>(fn: T, delay: numb
   };
 }
 
-const PROVINCE_MAP: Record<string, string> = {
-  "Ciudad Autónoma de Buenos Aires": "Buenos Aires (CABA)",
-  "Buenos Aires": "Buenos Aires",
-  "Córdoba": "Córdoba",
-  "Santa Fe": "Santa Fe",
-  "Mendoza": "Mendoza",
-  "Tucumán": "Tucumán",
-  "Entre Ríos": "Entre Ríos",
-  "Salta": "Salta",
-  "Misiones": "Misiones",
-  "Chaco": "Chaco",
-  "Corrientes": "Corrientes",
-  "Santiago del Estero": "Santiago del Estero",
-  "San Juan": "San Juan",
-  "Jujuy": "Jujuy",
-  "Río Negro": "Río Negro",
-  "Neuquén": "Neuquén",
-  "Formosa": "Formosa",
-  "Chubut": "Chubut",
-  "San Luis": "San Luis",
-  "Catamarca": "Catamarca",
-  "La Rioja": "La Rioja",
-  "La Pampa": "La Pampa",
-  "Santa Cruz": "Santa Cruz",
-  "Tierra del Fuego": "Tierra del Fuego",
-};
 
 export function AddressAutocomplete({
   id,
@@ -68,6 +38,9 @@ export function AddressAutocomplete({
   onChange,
   onSelectAddress,
   placeholder = "Av. Santa Fe 1234",
+  inputClassName,
+  containerClassName,
+  minChars = 3,
 }: AddressAutocompleteProps) {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -76,32 +49,17 @@ export function AddressAutocomplete({
 
   const fetchSuggestions = useCallback(
     debounce(async (query: string) => {
-      if (query.length < 4) {
+      if (query.length < minChars) {
         setSuggestions([]);
         setOpen(false);
         return;
       }
       setIsLoading(true);
       try {
-        const url = `https://apis.datos.gob.ar/georef/api/direcciones?direccion=${encodeURIComponent(query)}&max=5&campos=nomenclatura,calle.nombre,altura.valor,localidad_censal.nombre,municipio.nombre,provincia.nombre`;
+        const url = `/api/address?query=${encodeURIComponent(query)}`;
         const res = await fetch(url);
         if (!res.ok) return;
-        const json = await res.json();
-        const direcciones: GeorefDireccion[] = json.direcciones || [];
-
-        const mapped: Suggestion[] = direcciones.map((d) => {
-          const city = d.localidad_censal?.nombre || d.municipio?.nombre || "";
-          const rawProvince = d.provincia?.nombre || "";
-          const state = PROVINCE_MAP[rawProvince] || rawProvince;
-          const streetNum = d.altura?.valor ? ` ${d.altura.valor}` : "";
-          const address = `${d.calle.nombre}${streetNum}`;
-          return {
-            label: d.nomenclatura,
-            address,
-            city,
-            state,
-          };
-        });
+        const mapped: Suggestion[] = await res.json();
 
         setSuggestions(mapped);
         setOpen(mapped.length > 0);
@@ -123,7 +81,7 @@ export function AddressAutocomplete({
     onChange(s.address);
     setSuggestions([]);
     setOpen(false);
-    onSelectAddress?.({ address: s.address, city: s.city, state: s.state });
+    onSelectAddress?.({ address: s.address, city: s.city, state: s.state, neighborhood: s.neighborhood });
   };
 
   // Close on click outside
@@ -138,7 +96,7 @@ export function AddressAutocomplete({
   }, []);
 
   return (
-    <div ref={containerRef} className="relative">
+    <div ref={containerRef} className={containerClassName ?? "relative"}>
       <div className="relative">
         <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <input
@@ -149,7 +107,10 @@ export function AddressAutocomplete({
           onFocus={() => suggestions.length > 0 && setOpen(true)}
           placeholder={placeholder}
           autoComplete="off"
-          className="flex h-10 w-full rounded-lg border border-input bg-background pl-9 pr-9 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          className={
+            inputClassName
+            ?? "flex h-10 w-full rounded-lg border border-input bg-background pl-9 pr-9 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          }
         />
         {isLoading && (
           <Loader2 className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />

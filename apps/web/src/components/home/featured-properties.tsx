@@ -69,6 +69,19 @@ function PropertyCard3D({
   const image = property.images[0];
   const typeLabel = PROPERTY_TYPE_LABELS[property.type as keyof typeof PROPERTY_TYPE_LABELS];
   const opLabel = OPERATION_TYPE_LABELS[property.operation as keyof typeof OPERATION_TYPE_LABELS];
+  const templateSlug = (tenant as { templateSlug?: string }).templateSlug || "modern";
+  const isClassic = templateSlug === "classic";
+  const isMinimal = templateSlug === "minimal";
+  const cardClass = isClassic
+    ? "group block overflow-hidden rounded-lg border bg-white shadow-sm transition-shadow hover:shadow-lg"
+    : isMinimal
+      ? "group block overflow-hidden rounded-2xl border border-border/60 bg-card/80 shadow-none transition-shadow hover:shadow-md"
+      : "group block overflow-hidden rounded-xl border bg-card shadow-sm transition-shadow hover:shadow-xl";
+  const priceClass = isClassic
+    ? "rounded-lg bg-white/90 px-3 py-1.5 text-lg font-bold text-foreground shadow backdrop-blur"
+    : isMinimal
+      ? "rounded-full bg-foreground/90 px-3 py-1.5 text-lg font-bold text-background shadow"
+      : "rounded-lg bg-slate-900/80 px-3 py-1.5 text-lg font-bold text-white backdrop-blur";
 
   return (
     <Atropos
@@ -81,7 +94,7 @@ function PropertyCard3D({
     >
       <Link
         href={`/propiedades/${property.slug}`}
-        className="group block overflow-hidden rounded-xl border bg-card shadow-sm transition-shadow hover:shadow-xl"
+        className={cardClass}
       >
         <div className="relative aspect-[4/3] overflow-hidden bg-muted">
           {image ? (
@@ -112,7 +125,7 @@ function PropertyCard3D({
           </div>
 
           <div className="absolute bottom-3 left-3" data-atropos-offset="7">
-            <span className="rounded-lg bg-slate-900/80 px-3 py-1.5 text-lg font-bold text-white backdrop-blur">
+            <span className={priceClass}>
               {formatPrice(Number(property.price), property.currency)}
             </span>
           </div>
