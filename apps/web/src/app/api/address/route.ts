@@ -8,6 +8,9 @@ type Suggestion = {
   neighborhood?: string;
 };
 
+// TODO: make this configurable per tenant
+const SEARCH_PROVINCE = "Buenos Aires";
+
 const CACHE_TTL_MS = 10 * 60 * 1000;
 const cache = new Map<string, { ts: number; data: Suggestion[] }>();
 
@@ -33,7 +36,7 @@ type GeorefLocalidad = {
 
 async function fetchLocalidades(query: string): Promise<Suggestion[]> {
   try {
-    const url = `https://apis.datos.gob.ar/georef/api/localidades?nombre=${encodeURIComponent(query)}&max=5&campos=nombre,municipio.nombre,provincia.nombre`;
+    const url = `https://apis.datos.gob.ar/georef/api/localidades?nombre=${encodeURIComponent(query)}&provincia=${encodeURIComponent(SEARCH_PROVINCE)}&max=5&campos=nombre,municipio.nombre,provincia.nombre`;
     const res = await fetch(url, { next: { revalidate: 0 } });
     if (!res.ok) return [];
     const json = await res.json();
@@ -62,7 +65,7 @@ type GeorefMunicipio = {
 
 async function fetchMunicipios(query: string): Promise<Suggestion[]> {
   try {
-    const url = `https://apis.datos.gob.ar/georef/api/municipios?nombre=${encodeURIComponent(query)}&max=3&campos=nombre,provincia.nombre`;
+    const url = `https://apis.datos.gob.ar/georef/api/municipios?nombre=${encodeURIComponent(query)}&provincia=${encodeURIComponent(SEARCH_PROVINCE)}&max=3&campos=nombre,provincia.nombre`;
     const res = await fetch(url, { next: { revalidate: 0 } });
     if (!res.ok) return [];
     const json = await res.json();
@@ -96,7 +99,8 @@ async function fetchDirecciones(query: string): Promise<Suggestion[]> {
     const res = await fetch(url, { next: { revalidate: 0 } });
     if (!res.ok) return [];
     const json = await res.json();
-    const direcciones: GeorefDireccion[] = json.direcciones || [];
+    const direcciones: GeorefDireccion[] = (json.direcciones || [])
+      .filter((d: GeorefDireccion) => d.provincia?.nombre === SEARCH_PROVINCE);
     return direcciones.map((d) => {
       const city = d.localidad_censal?.nombre || d.municipio?.nombre || "";
       const streetNum = d.altura?.valor ? ` ${d.altura.valor}` : "";
@@ -132,7 +136,7 @@ export async function GET(request: Request) {
 
   if (query.length < 3) return NextResponse.json([]);
 
-  const cacheKey = `georef:v2:${query}`;
+  const cacheKey = `georef:v3:${SEARCH_PROVINCE}:${query}`;
   const cached = getCached(cacheKey);
   if (cached) return NextResponse.json(cached);
 
