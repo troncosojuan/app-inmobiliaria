@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Loader2, MapPin } from "lucide-react";
 
-
 interface Suggestion {
   label: string;
   address: string;
@@ -31,7 +30,6 @@ function debounce<T extends (...args: Parameters<T>) => void>(fn: T, delay: numb
   };
 }
 
-
 export function AddressAutocomplete({
   id,
   value,
@@ -45,6 +43,7 @@ export function AddressAutocomplete({
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [open, setOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const fetchSuggestions = useCallback(
@@ -56,11 +55,11 @@ export function AddressAutocomplete({
         return;
       }
       try {
-        const url = `/api/address?query=${encodeURIComponent(query)}`;
-        const res = await fetch(url);
+        const res = await fetch(`/api/address?query=${encodeURIComponent(query)}`);
         if (!res.ok) return;
         const mapped: Suggestion[] = await res.json();
         setSuggestions(mapped);
+        setActiveIndex(-1);
         setOpen(mapped.length > 0);
       } catch {
         // fail silently — user can still type manually
@@ -79,10 +78,42 @@ export function AddressAutocomplete({
   };
 
   const handleSelect = (s: Suggestion) => {
-    onChange(s.address);
+    // For locality results (no street), keep whatever the user typed as address
+    // For street results, fill in the street
+    if (s.address) onChange(s.address);
     setSuggestions([]);
     setOpen(false);
-    onSelectAddress?.({ address: s.address, city: s.city, state: s.state, neighborhood: s.neighborhood });
+    setActiveIndex(-1);
+    onSelectAddress?.({
+      address: s.address,
+      city: s.city,
+      state: s.state,
+      neighborhood: s.neighborhood,
+    });
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!open || suggestions.length === 0) return;
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveIndex((i) => Math.min(i + 1, suggestions.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveIndex((i) => Math.max(i - 1, -1));
+    } else if (e.key === "Enter") {
+      if (activeIndex >= 0) {
+        e.preventDefault();
+        handleSelect(suggestions[activeIndex]);
+      } else {
+        // No item selected — select first suggestion automatically
+        e.preventDefault();
+        handleSelect(suggestions[0]);
+      }
+    } else if (e.key === "Escape") {
+      setOpen(false);
+      setActiveIndex(-1);
+    }
   };
 
   // Close on click outside
@@ -105,12 +136,13 @@ export function AddressAutocomplete({
           type="text"
           value={value}
           onChange={handleInput}
+          onKeyDown={handleKeyDown}
           onFocus={() => suggestions.length > 0 && setOpen(true)}
           placeholder={placeholder}
           autoComplete="off"
           className={
-            inputClassName
-            ?? "flex h-10 w-full rounded-lg border border-input bg-background pl-9 pr-9 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            inputClassName ??
+            "flex h-10 w-full rounded-lg border border-input bg-background pl-9 pr-9 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           }
         />
         {isLoading && (
@@ -122,19 +154,30 @@ export function AddressAutocomplete({
 
       {open && suggestions.length > 0 && (
         <ul className="absolute z-50 mt-1 w-full overflow-hidden rounded-lg border border-input bg-popover shadow-lg">
-          {suggestions.map((s, i) => (
-            <li key={i}>
-              <button
-                type="button"
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => handleSelect(s)}
-                className="flex w-full flex-col px-4 py-2.5 text-left hover:bg-muted transition-colors"
-              >
-                <span className="text-sm font-medium text-foreground truncate">{s.address}</span>
-                <span className="text-xs text-muted-foreground truncate">{s.city ? `${s.city}, ` : ""}{s.state}</span>
-              </button>
-            </li>
-          ))}
+          {suggestions.map((s, i) => {
+            // Locality result: address is empty, show city as primary
+            const primary = s.address || s.city;
+            const secondary = s.address
+              ? [s.city, s.state].filter(Boolean).join(", ")
+              : s.state;
+            return (
+              <li key={i}>
+                <button
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => handleSelect(s)}
+                  className={`flex w-full flex-col px-4 py-2.5 text-left transition-colors ${
+                    i === activeIndex ? "bg-muted" : "hover:bg-muted"
+                  }`}
+                >
+                  <span className="text-sm font-medium text-foreground truncate">{primary}</span>
+                  {secondary && (
+                    <span className="text-xs text-muted-foreground truncate">{secondary}</span>
+                  )}
+                </button>
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>
