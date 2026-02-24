@@ -7,11 +7,13 @@ import { PropertyMap } from "./property-map";
 
 interface MapPageClientProps {
   primaryColor: string;
+  initialOperation?: string;
+  initialType?: string;
 }
 
-export function MapPageClient({ primaryColor }: MapPageClientProps) {
-  const [type, setType] = useState("");
-  const [operation, setOperation] = useState("");
+export function MapPageClient({ primaryColor, initialOperation = "", initialType = "" }: MapPageClientProps) {
+  const [type, setType] = useState(initialType);
+  const [operation, setOperation] = useState(initialOperation);
 
   return (
     <div className="space-y-6">

@@ -7,7 +7,7 @@ import { Pagination } from "@/components/properties/pagination";
 import { SearchAlertButton } from "@/components/properties/search-alert-button";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { X } from "lucide-react";
+import { X, Map } from "lucide-react";
 import type { Metadata } from "next";
 
 const OPERATION_LABELS: Record<string, string> = {
@@ -102,6 +102,12 @@ export default async function PropiedadesPage({ searchParams }: Props) {
     PropertyService.getCities(tenant.id),
   ]);
 
+  const mapaParams = new URLSearchParams();
+  if (params.operation) mapaParams.set("operation", params.operation);
+  if (params.type) mapaParams.set("type", params.type);
+  if (params.city) mapaParams.set("city", params.city);
+  const mapaHref = `/mapa${mapaParams.toString() ? `?${mapaParams.toString()}` : ""}`;
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -113,7 +119,14 @@ export default async function PropiedadesPage({ searchParams }: Props) {
           </p>
           <ActiveFiltersBar params={params} />
         </div>
-        <div className="shrink-0">
+        <div className="flex shrink-0 items-center gap-2">
+          <Link
+            href={mapaHref}
+            className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+          >
+            <Map className="h-4 w-4" />
+            Ver en mapa
+          </Link>
           <SearchAlertButton tenantId={tenant.id} filters={params} />
         </div>
       </div>

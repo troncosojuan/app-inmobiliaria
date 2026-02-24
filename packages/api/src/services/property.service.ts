@@ -221,6 +221,7 @@ export class PropertyService {
   static readonly UPDATABLE_FIELDS = [
     "title", "description", "type", "operation", "price", "currency",
     "expenses", "address", "city", "state", "neighborhood",
+    "latitude", "longitude",
     "totalArea", "coveredArea", "rooms", "bedrooms", "bathrooms",
     "garages", "floor", "yearBuilt", "amenities", "status", "isFeatured",
     "metaTitle", "metaDescription", "virtualTourUrl",

@@ -30,6 +30,9 @@ export * from "./validators/crm.validators";
 export * from "./validators/onboarding.validators";
 export { BillingService } from "./services/billing.service";
 
+// Utils
+export { geocodeAddress } from "./utils/geocode";
+
 // Auth
 export { createAuthConfig } from "./auth/auth-config";
 

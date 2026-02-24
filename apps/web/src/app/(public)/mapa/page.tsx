@@ -11,13 +11,21 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function MapPage() {
-  const tenant = await getTenant();
+interface Props {
+  searchParams: Promise<Record<string, string | undefined>>;
+}
+
+export default async function MapPage({ searchParams }: Props) {
+  const [tenant, params] = await Promise.all([getTenant(), searchParams]);
   if (!tenant) return null;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
-      <MapPageClient primaryColor={tenant.primaryColor} />
+      <MapPageClient
+        primaryColor={tenant.primaryColor}
+        initialOperation={params.operation}
+        initialType={params.type}
+      />
     </div>
   );
 }
