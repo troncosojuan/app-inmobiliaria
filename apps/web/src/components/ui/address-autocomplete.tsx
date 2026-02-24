@@ -52,15 +52,14 @@ export function AddressAutocomplete({
       if (query.length < minChars) {
         setSuggestions([]);
         setOpen(false);
+        setIsLoading(false);
         return;
       }
-      setIsLoading(true);
       try {
         const url = `/api/address?query=${encodeURIComponent(query)}`;
         const res = await fetch(url);
         if (!res.ok) return;
         const mapped: Suggestion[] = await res.json();
-
         setSuggestions(mapped);
         setOpen(mapped.length > 0);
       } catch {
@@ -73,8 +72,10 @@ export function AddressAutocomplete({
   );
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(e.target.value);
-    fetchSuggestions(e.target.value);
+    const val = e.target.value;
+    onChange(val);
+    if (val.length >= minChars) setIsLoading(true);
+    fetchSuggestions(val);
   };
 
   const handleSelect = (s: Suggestion) => {
