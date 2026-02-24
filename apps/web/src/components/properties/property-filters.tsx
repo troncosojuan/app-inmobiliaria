@@ -46,7 +46,7 @@ export function PropertyFilters({ cities, currentFilters }: PropertyFiltersProps
 
   const [priceMin, setPriceMin] = useState(currentFilters.minPrice || "");
   const [priceMax, setPriceMax] = useState(currentFilters.maxPrice || "");
-  const priceTimer = useRef<ReturnType<typeof setTimeout>>();
+  const priceTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const selectedTypes = currentFilters.types
     ? currentFilters.types.split(",").filter(Boolean)

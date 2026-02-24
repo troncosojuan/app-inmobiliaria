@@ -1,12 +1,14 @@
 import { requireAuth } from "@/lib/auth";
 import { DashboardService } from "@app-inmobiliaria/api";
 import Link from "next/link";
+import { Suspense } from "react";
 import {
   Phone, Mail, MessageCircle,
   Plus, Users, Calculator, Settings,
 } from "lucide-react";
 import { PageHeader, SectionCard, ICON_COLORS, type ColorKey } from "@app-inmobiliaria/ui";
 import { AnimatedStats } from "@/components/dashboard/animated-stats";
+import { DolarWidget } from "@/components/dashboard/dolar-widget";
 
 export const dynamic = "force-dynamic";
 
@@ -54,6 +56,10 @@ export default async function DashboardPage() {
           </Link>
         ))}
       </div>
+
+      <Suspense fallback={null}>
+        <DolarWidget />
+      </Suspense>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <SectionCard

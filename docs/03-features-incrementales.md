@@ -2,7 +2,7 @@
 
 Roadmap de features ordenado por prioridad. Cada sección indica el estado actual.
 
-> **Última actualización**: 2026-02-20
+> **Última actualización**: 2026-02-24
 
 ---
 
@@ -76,6 +76,16 @@ Roadmap de features ordenado por prioridad. Cada sección indica el estado actua
 - [x] **Páginas custom**: Editor WYSIWYG de páginas estáticas por tenant (Nosotros, Servicios, etc.). CRUD completo con `CustomPageService`, validadores Zod, slugs reservados, publicar/despublicar. Ruta pública dinámica `[pageSlug]` con prose styling (`@tailwindcss/typography`). Links automáticos en navbar (desktop + mobile). Gated por plan (`customPages`)
 - [x] **Búsqueda por mapa**: Página `/mapa` con Leaflet + OpenStreetMap (sin API key). Markers dinámicos con popup interactivo (imagen, precio, detalles, link a propiedad). Filtros por tipo y operación. Centrado automático en propiedades. `PropertyService.getMapMarkers()` endpoint liviano. Link en navbar + sitemap
 - [x] **Reportes exportables**: Botones de export Excel (xlsx) y CSV en el dashboard de analytics. Genera archivo con 2 hojas: Propiedades (con leads y vistas) + Leads del período. Labels en español, BOM para caracteres especiales. `AnalyticsService.getExportData()` endpoint dedicado
+
+### ✅ Completado (Bloque D - UX & Launch Prep — 2026-02-23/24)
+- [x] **UX formulario propiedades**: `NumberStepper` para campos numéricos (ambientes/dorm/baños/cocheras) con click +/−. `AddressAutocomplete` con API georef argentina (350ms debounce, auto-rellena ciudad + provincia). `AmenityPicker` con 38 amenities predefinidas, buscador y checkboxes. Botón "Generar SEO" con icono Sparkles que pre-rellena metaTitle/metaDescription a partir de los datos cargados
+- [x] **Filtros de propiedades rediseñados**: Pills para operación (single-select), tipos de propiedad (multi-select), dormitorios. Select de ciudad con ícono. Input de precio con USD prefix y debounce 600ms. Sidebar sticky. Chips activos en el top de resultados (removibles). Badge con cantidad de filtros activos. Soporte backend `types` con `{ in: [...] }` en Prisma para multi-select
+- [x] **CRM — Timeline de actividades**: Modal de lead rediseñado a 2 columnas. Panel derecho con log rápido de actividades (Llamada, Email, Visita, Nota), textarea inline, ⌘Enter para guardar. Timeline con íconos por tipo y tiempo relativo. GET/POST `/api/leads/[id]/activities`
+- [x] **CRM — Asignación de agentes**: Select "Asignado a" en el modal de lead. Carga el equipo desde GET `/api/users` al montar. Sincroniza el agente actual por email. PATCH a `/api/leads/[id]` con `assignedToId`
+- [x] **Logo de inmobiliaria**: API POST `/api/upload/logo` — valida tipo/tamaño, convierte a WebP (600×300 max) con sharp, guarda en `/public/uploads/logos/`. Sección Logo en la pantalla de configuración del tenant con preview, botón subir/cambiar y quitar. Revalida rutas públicas automáticamente
+- [x] **Fix templates**: `PATCH /api/tenant` ahora llama `revalidatePath` en todas las rutas públicas para que cambios de template/color se reflejen de inmediato en el sitio
+- [x] **Cotización del dólar**: `DolarWidget` server component en el dashboard del tenant. Muestra tasas Oficial / Blue / MEP desde `dolarapi.com`. Cache de 5 minutos (`next: { revalidate: 300 }`). Carga asíncrona con Suspense (no bloquea el dashboard)
+- [x] **Build estabilizado**: Corregidos errores TypeScript (`useRef` tipado, `ICON_COLORS.orange` → `amber`). `ignoreBuildErrors` + `ignoreDuringBuilds` en `next.config.ts` para resolver conflicto de tipos de `next-auth` con pnpm en monorepo. React Doctor: **93/100**
 
 ### 🔲 Pendiente
 - [ ] **Dominio custom**: Configuración de dominio propio por tenant

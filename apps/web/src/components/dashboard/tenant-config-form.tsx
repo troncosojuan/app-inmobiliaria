@@ -109,8 +109,8 @@ export function TenantConfigForm({ tenant }: TenantConfigFormProps) {
       {/* Logo */}
       <div className="rounded-xl border bg-card p-6 shadow-sm">
         <div className="mb-5 flex items-center gap-3">
-          <div className={`rounded-lg ${ICON_COLORS.orange.bg} p-2`}>
-            <ImageIcon className={`h-5 w-5 ${ICON_COLORS.orange.text}`} />
+          <div className={`rounded-lg ${ICON_COLORS.amber.bg} p-2`}>
+            <ImageIcon className={`h-5 w-5 ${ICON_COLORS.amber.text}`} />
           </div>
           <h2 className="text-lg font-semibold text-foreground">Logo</h2>
         </div>

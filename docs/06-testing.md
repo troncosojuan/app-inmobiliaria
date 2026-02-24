@@ -3,7 +3,7 @@
 Documento vivo de casos de prueba, bugs encontrados y feedback de uso real.
 Actualizar cada vez que se encuentra un comportamiento inesperado o se valida un flujo.
 
-> **Última actualización**: 2026-02-23 (UX formulario propiedades)
+> **Última actualización**: 2026-02-24 (cotización dólar, asignación de agentes, build fixes)
 
 ---
 
@@ -159,10 +159,10 @@ Actualizar cada vez que se encuentra un comportamiento inesperado o se valida un
 | Fecha | Descripción | Severidad | Estado |
 |-------|-------------|-----------|--------|
 | 2026-02-23 | Scroll vertical bloqueado en cards mobile (StaggerItem/Atropos) | Baja | ✅ Resuelto |
-| 2026-02-23 | Admin `/tenants/[id]` da 404 — página de edición no implementada | Alta | ⏳ Pendiente |
+| 2026-02-23 | Admin `/tenants/[id]` da 404 — página de edición no implementada | Alta | ✅ Resuelto — página + form + API ya implementados |
 | 2026-02-23 | Sección colores de marca en crear tenant — diseño desacomodado | Media | ⏳ Pendiente |
 | 2026-02-23 | Analytics — hover en "leads por día" pinta el gráfico con mal color | Baja | ⏳ Pendiente |
-| 2026-02-23 | Templates — cambiar template no aplica ningún cambio visual | Alta | ⏳ Pendiente |
+| 2026-02-23 | Templates — cambiar template no aplica ningún cambio visual | Alta | ✅ Resuelto — `revalidatePath` agregado en `PATCH /api/tenant` |
 | 2026-02-23 | IPC calculator — datepicker con diseño feo | Baja | ⏳ Pendiente |
 | 2026-02-23 | Inputs numéricos — tienen flechitas arriba/abajo, sacarlas | Baja | ✅ Resuelto |
 | 2026-02-23 | Formulario propiedades — campos numéricos (amb/dorm/baños/coch) como texto | Alta | ✅ Resuelto → NumberStepper |
@@ -176,15 +176,15 @@ Actualizar cada vez que se encuentra un comportamiento inesperado o se valida un
 
 | Fecha | Quién | Observación | Acción |
 |-------|-------|-------------|--------|
-| 2026-02-23 | Testing interno | Páginas admin sin implementar: usuarios, planes, analíticas, páginas, configuración | ⏳ Pendiente |
+| 2026-02-23 | Testing interno | Páginas admin sin implementar: usuarios, planes, analíticas, páginas, configuración | ⏳ Pendiente (baja prioridad pre-lanzamiento) |
 | 2026-02-23 | Testing interno | Sección "consultas" en admin — solo muestra la consulta, sin acciones posibles | ⏳ Planificar |
 | 2026-02-23 | Testing interno | Sección "páginas" en admin — bajo valor para usuario promedio, reemplazar por templates precargados | ⏳ Idea futura |
 | 2026-02-23 | Testing interno | Sección "publicaciones" — falta implementación | ⏳ Pendiente |
-| 2026-02-23 | Feedback inmobiliaria | Carga de propiedades tiene que ser casi sin teclado — todo clicks | 🔴 Alta prioridad |
-| 2026-02-23 | Feedback inmobiliaria | Dirección: autocompletado con Google Maps API mientras escribe | 🔴 Alta prioridad |
-| 2026-02-23 | Feedback inmobiliaria | Cocheras, baños, dormitorios — inputs click (0,1,2,3...) no texto | 🔴 Alta prioridad |
-| 2026-02-23 | Feedback inmobiliaria | Amenities — buscador con checkbox para seleccionar | Media |
-| 2026-02-23 | Feedback inmobiliaria | SEO — AI que sugiera título/descripción precargada y editable | Media |
+| 2026-02-23 | Feedback inmobiliaria | Carga de propiedades tiene que ser casi sin teclado — todo clicks | ✅ Resuelto — NumberStepper, AmenityPicker, AddressAutocomplete |
+| 2026-02-23 | Feedback inmobiliaria | Dirección: autocompletado con Google Maps API mientras escribe | ⚠️ Parcial — AddressAutocomplete con georef (arg). Google Maps requiere API key |
+| 2026-02-23 | Feedback inmobiliaria | Cocheras, baños, dormitorios — inputs click (0,1,2,3...) no texto | ✅ Resuelto — NumberStepper |
+| 2026-02-23 | Feedback inmobiliaria | Amenities — buscador con checkbox para seleccionar | ✅ Resuelto — AmenityPicker |
+| 2026-02-23 | Feedback inmobiliaria | SEO — AI que sugiera título/descripción precargada y editable | ✅ Resuelto — botón "Generar SEO" |
 
 ---
 
@@ -197,10 +197,13 @@ Actualizar cada vez que se encuentra un comportamiento inesperado o se valida un
 | 2026-02-23 | Toggle dark/light mode para visitantes del sitio público | UX | Media |
 | 2026-02-23 | Buscador y filtros en tablas de admin (propiedades, leads) | UX | Media |
 | 2026-02-23 | Sistema de notificaciones para admin y agentes | Operacional | Media |
-| 2026-02-23 | Logo de inmobiliaria en web pública | Branding | Alta |
+| 2026-02-23 | Logo de inmobiliaria en web pública | Branding | ✅ Implementado (upload + preview en configuración) |
 | 2026-02-23 | Hero con carrusel de imágenes o video corto | Visual | Baja (futuro) |
-| 2026-02-23 | Buscador en home: select con tipos de propiedad | UX | Alta |
-| 2026-02-23 | Tareas con sistema de alertas configurables y asignación a agentes | Operacional | Media |
-| 2026-02-23 | Cotización del dólar visible de forma permanente | Local AR | Alta |
-| 2026-02-23 | Migración de propiedades desde URL de web anterior (scraping + AI) | Onboarding | Media (futuro) |
-| 2026-02-23 | Templates: aplicar a nivel global como "hotplug" en toda la app | Core | Alta |
+| 2026-02-23 | Buscador en home: select con tipos de propiedad | UX | ✅ Implementado (SearchSection ya existía) |
+| 2026-02-23 | Tareas con sistema de alertas configurables y asignación a agentes | Operacional | ⏳ Pendiente |
+| 2026-02-23 | Cotización del dólar visible de forma permanente | Local AR | ✅ Implementado (DolarWidget — Oficial/Blue/MEP) |
+| 2026-02-23 | Migración de propiedades desde URL de web anterior (scraping + AI) | Onboarding | ⏳ Futuro |
+| 2026-02-23 | Templates: aplicar a nivel global como "hotplug" en toda la app | Core | ✅ Resuelto — revalidatePath aplica cambios inmediatamente |
+| 2026-02-24 | Asignación de agentes en modal CRM | CRM | ✅ Implementado (select con equipo en modal de lead) |
+| 2026-02-24 | Mapa interactivo con búsqueda de propiedades por zona | UX | ⏳ Pendiente (react-leaflet ya disponible en /mapa) |
+| 2026-02-24 | Autocompletado de dirección con Google Maps Places API | UX | ⏳ Pendiente — requiere API key de Google Cloud |

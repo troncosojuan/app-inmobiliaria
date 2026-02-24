@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import {
   LayoutGrid, List, Phone, Mail, MessageCircle,
   ChevronDown, X, Users, GripVertical, Save,
-  PhoneCall, MapPin, FileText, Clock, Plus, Loader2, Send,
+  PhoneCall, MapPin, FileText, Clock, Plus, Loader2, Send, UserCheck,
 } from "lucide-react";
 
 import { LEAD_PIPELINE_COLUMNS, LEAD_STATUS_CONFIG } from "@app-inmobiliaria/types";
@@ -63,6 +63,12 @@ interface LeadsPipelineProps {
   initialLeads: LeadBase[];
 }
 
+interface TeamUser {
+  id: string;
+  name: string | null;
+  email: string;
+}
+
 export function LeadsPipeline({ initialLeads }: LeadsPipelineProps) {
   const [leads, setLeads] = useState<LeadBase[]>(initialLeads);
   const [view, setView] = useState<"kanban" | "table">("kanban");
@@ -70,12 +76,32 @@ export function LeadsPipeline({ initialLeads }: LeadsPipelineProps) {
   const [editNotes, setEditNotes] = useState("");
   const [draggedId, setDraggedId] = useState<string | null>(null);
 
+  // Team / assignment state
+  const [teamUsers, setTeamUsers] = useState<TeamUser[]>([]);
+  const [assigneeId, setAssigneeId] = useState<string>("");
+
   // Activities state
   const [activities, setActivities] = useState<Activity[]>([]);
   const [activitiesLoading, setActivitiesLoading] = useState(false);
   const [newActivityType, setNewActivityType] = useState<string | null>(null);
   const [activityContent, setActivityContent] = useState("");
   const [isSavingActivity, setIsSavingActivity] = useState(false);
+
+  // Fetch team users once on mount
+  useEffect(() => {
+    fetch("/api/users")
+      .then((r) => r.json())
+      .then((data) => Array.isArray(data) ? setTeamUsers(data) : [])
+      .catch(() => {});
+  }, []);
+
+  // Sync assignee when lead opens or team list loads
+  useEffect(() => {
+    if (!selectedLead) { setAssigneeId(""); return; }
+    if (!selectedLead.assignedTo) { setAssigneeId(""); return; }
+    const match = teamUsers.find((u) => u.email === selectedLead.assignedTo?.email);
+    setAssigneeId(match?.id ?? "");
+  }, [selectedLead?.id, teamUsers]);
 
   // Fetch activities when a lead is opened
   useEffect(() => {
@@ -124,6 +150,24 @@ export function LeadsPipeline({ initialLeads }: LeadsPipelineProps) {
       toast.success("Notas guardadas");
     } catch {
       toast.error("Error al guardar notas");
+    }
+  };
+
+  const assignAgent = async (leadId: string, userId: string) => {
+    try {
+      const res = await fetch(`/api/leads/${leadId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ assignedToId: userId || null }),
+      });
+      if (!res.ok) throw new Error();
+      const newUser = userId ? teamUsers.find((u) => u.id === userId) : null;
+      const assignedTo = newUser ? { name: newUser.name, email: newUser.email } : null;
+      setLeads((l) => l.map((lead) => lead.id === leadId ? { ...lead, assignedTo } : lead));
+      setSelectedLead((prev) => prev ? { ...prev, assignedTo } : null);
+      toast.success(userId ? "Lead asignado" : "Asignación eliminada");
+    } catch {
+      toast.error("Error al asignar el lead");
     }
   };
 
@@ -381,6 +425,28 @@ export function LeadsPipeline({ initialLeads }: LeadsPipelineProps) {
                       ))}
                     </div>
                   </div>
+
+                  {teamUsers.length > 0 && (
+                    <div>
+                      <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
+                        <UserCheck className="h-3 w-3" /> Asignado a
+                      </p>
+                      <select
+                        value={assigneeId}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setAssigneeId(val);
+                          assignAgent(selectedLead.id, val);
+                        }}
+                        className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      >
+                        <option value="">Sin asignar</option>
+                        {teamUsers.map((u) => (
+                          <option key={u.id} value={u.id}>{u.name || u.email}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
 
                   <div>
                     <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Notas internas</p>
