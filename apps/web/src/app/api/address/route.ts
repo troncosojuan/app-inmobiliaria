@@ -79,8 +79,11 @@ function normalizeNominatim(item: any): Suggestion | null {
   };
 }
 
+// Bounding box for Buenos Aires Province + CABA — biases results without hard-blocking
+const BA_VIEWBOX = "-63.5,-41.5,-57.0,-33.0";
+
 async function fetchNominatim(query: string): Promise<Suggestion[]> {
-  const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=5&countrycodes=ar&q=${encodeURIComponent(query)}`;
+  const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=5&countrycodes=ar&viewbox=${BA_VIEWBOX}&q=${encodeURIComponent(query)}`;
   const res = await fetch(url, {
     headers: {
       "User-Agent": "app-inmobiliaria/1.0 (contacto@app-inmobiliaria.local)",
@@ -132,7 +135,7 @@ export async function GET(request: Request) {
     return NextResponse.json([]);
   }
 
-  const cacheKey = `ar:${query}`;
+  const cacheKey = `ar:ba:${query}`;
   const cached = getCached(cacheKey);
   if (cached) return NextResponse.json(cached);
 
