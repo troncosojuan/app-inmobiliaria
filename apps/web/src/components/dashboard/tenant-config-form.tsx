@@ -4,9 +4,10 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import {
   Settings, Palette, Phone, Globe, Crown, Save, Loader2, ExternalLink,
-  Link2, CheckCircle2, AlertCircle, XCircle,
+  Link2, CheckCircle2, AlertCircle, XCircle, ImageIcon, Upload, Trash2,
 } from "lucide-react";
 import { FormInput, FormLabel, ICON_COLORS } from "@app-inmobiliaria/ui";
+import Image from "next/image";
 import { useFormSubmit } from "@/hooks/use-form-submit";
 import { toast } from "sonner";
 import type { TenantBase } from "@app-inmobiliaria/types";
@@ -16,6 +17,43 @@ interface TenantConfigFormProps {
 }
 
 export function TenantConfigForm({ tenant }: TenantConfigFormProps) {
+  const [logoUrl, setLogoUrl] = useState<string | null>(tenant.logo || null);
+  const [logoUploading, setLogoUploading] = useState(false);
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setLogoUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/upload/logo", { method: "POST", body: fd });
+      if (!res.ok) throw new Error();
+      const { logoUrl: url } = await res.json();
+      setLogoUrl(url);
+      toast.success("Logo actualizado");
+    } catch {
+      toast.error("Error al subir el logo");
+    } finally {
+      setLogoUploading(false);
+      e.target.value = "";
+    }
+  };
+
+  const handleRemoveLogo = async () => {
+    try {
+      await fetch("/api/tenant", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ logo: null }),
+      });
+      setLogoUrl(null);
+      toast.success("Logo eliminado");
+    } catch {
+      toast.error("Error al eliminar el logo");
+    }
+  };
+
   const { submit, isSubmitting: isSaving } = useFormSubmit({
     url: "/api/tenant",
     method: "PATCH",
@@ -68,6 +106,71 @@ export function TenantConfigForm({ tenant }: TenantConfigFormProps) {
         </div>
       </div>
 
+      {/* Logo */}
+      <div className="rounded-xl border bg-card p-6 shadow-sm">
+        <div className="mb-5 flex items-center gap-3">
+          <div className={`rounded-lg ${ICON_COLORS.orange.bg} p-2`}>
+            <ImageIcon className={`h-5 w-5 ${ICON_COLORS.orange.text}`} />
+          </div>
+          <h2 className="text-lg font-semibold text-foreground">Logo</h2>
+        </div>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+          {/* Preview */}
+          <div className="flex h-24 w-40 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-dashed border-input bg-muted/50">
+            {logoUrl ? (
+              <Image
+                src={logoUrl}
+                alt="Logo actual"
+                width={160}
+                height={96}
+                className="h-full w-full object-contain p-2"
+                unoptimized
+              />
+            ) : (
+              <div className="flex flex-col items-center gap-1">
+                <ImageIcon className="h-8 w-8 text-muted-foreground/40" />
+                <span className="text-xs text-muted-foreground">Sin logo</span>
+              </div>
+            )}
+          </div>
+
+          {/* Actions */}
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Se muestra en la barra de navegación y el footer del sitio. Recomendamos PNG o SVG con fondo transparente.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-input px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted">
+                {logoUploading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Upload className="h-4 w-4" />
+                )}
+                {logoUploading ? "Subiendo..." : logoUrl ? "Cambiar logo" : "Subir logo"}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleLogoUpload}
+                  disabled={logoUploading}
+                  className="hidden"
+                />
+              </label>
+              {logoUrl && (
+                <button
+                  type="button"
+                  onClick={handleRemoveLogo}
+                  className="inline-flex items-center gap-2 rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:border-red-800 dark:hover:bg-red-950/30"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Quitar
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Colores */}
       <div className="rounded-xl border bg-card p-6 shadow-sm">
         <div className="mb-5 flex items-center gap-3">
           <div className={`rounded-lg ${ICON_COLORS.violet.bg} p-2`}>
