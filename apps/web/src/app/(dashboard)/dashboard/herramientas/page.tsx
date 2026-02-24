@@ -1,4 +1,4 @@
-import { Calculator, TrendingUp, Percent, BarChart3 } from "lucide-react";
+import { TrendingUp, Percent, BarChart3, MapPin } from "lucide-react";
 import Link from "next/link";
 import { ICON_COLORS, type ColorKey } from "@app-inmobiliaria/ui";
 
@@ -23,6 +23,13 @@ const tools = [
     icon: BarChart3,
     href: "/dashboard/herramientas/rendimiento",
     color: "violet" as ColorKey,
+  },
+  {
+    title: "Geocodificar propiedades",
+    description: "Asigná coordenadas automáticas a tus propiedades para que aparezcan en el mapa",
+    icon: MapPin,
+    href: "/dashboard/herramientas/geocodificacion",
+    color: "emerald" as ColorKey,
   },
 ];
 

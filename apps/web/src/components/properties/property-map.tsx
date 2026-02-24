@@ -49,8 +49,9 @@ interface PropertyMapProps {
   filters?: { type?: string; operation?: string };
 }
 
-const DEFAULT_CENTER: [number, number] = [-34.6037, -58.3816]; // Buenos Aires
-const DEFAULT_ZOOM = 12;
+// Buenos Aires Province — shown until properties have coordinates
+const DEFAULT_CENTER: [number, number] = [-35.5, -59.5];
+const DEFAULT_ZOOM = 8;
 
 async function fetchMapMarkers(filters?: { type?: string; operation?: string }): Promise<MapProperty[]> {
   const params = new URLSearchParams();
