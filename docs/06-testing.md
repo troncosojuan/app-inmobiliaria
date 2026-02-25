@@ -3,7 +3,7 @@
 Documento vivo de casos de prueba, bugs encontrados y feedback de uso real.
 Actualizar cada vez que se encuentra un comportamiento inesperado o se valida un flujo.
 
-> **Última actualización**: 2026-02-24 (cotización dólar, asignación de agentes, build fixes)
+> **Última actualización**: 2026-02-25 (geocodificación, mapa, autocomplete dirección)
 
 ---
 
@@ -167,6 +167,12 @@ Actualizar cada vez que se encuentra un comportamiento inesperado o se valida un
 | 2026-02-23 | Inputs numéricos — tienen flechitas arriba/abajo, sacarlas | Baja | ✅ Resuelto |
 | 2026-02-23 | Formulario propiedades — campos numéricos (amb/dorm/baños/coch) como texto | Alta | ✅ Resuelto → NumberStepper |
 | 2026-02-23 | Formulario propiedades — dirección sin autocompletado | Alta | ✅ Resuelto → AddressAutocomplete (georef) |
+| 2026-02-25 | Autocomplete dirección — "beraza" devolvía Eduardo Beraza (calle) en vez de Berazategui | Alta | ✅ Resuelto → reescritura con georef `/localidades` + `/municipios` |
+| 2026-02-25 | Autocomplete — "bernal" devolvía resultados de Santa Fe y Córdoba antes que Buenos Aires | Alta | ✅ Resuelto → filtro `provincia=Buenos Aires` en queries |
+| 2026-02-25 | Autocomplete — Enter no hacía nada, no había navegación por teclado | Media | ✅ Resuelto → Enter selecciona primera sugerencia, flechas navegan, Escape cierra |
+| 2026-02-25 | Autocomplete — localidades mostraban texto vacío en el dropdown | Media | ✅ Resuelto → muestra `city` como texto principal cuando `address` está vacío |
+| 2026-02-25 | SearchSection home — input queda vacío al seleccionar una localidad | Alta | ✅ Resuelto → `data.address \|\| data.city` |
+| 2026-02-25 | Propiedades existentes no aparecen en el mapa (sin coordenadas) | Alta | ⚠️ Parcial → herramienta batch en /dashboard/herramientas/geocodificacion, correr manualmente |
 | 2026-02-23 | Formulario propiedades — amenities como texto libre separado por coma | Alta | ✅ Resuelto → AmenityPicker |
 | 2026-02-23 | Formulario propiedades — SEO sin ayuda para generar | Media | ✅ Resuelto → botón "Generar SEO" |
 
@@ -206,4 +212,6 @@ Actualizar cada vez que se encuentra un comportamiento inesperado o se valida un
 | 2026-02-23 | Templates: aplicar a nivel global como "hotplug" en toda la app | Core | ✅ Resuelto — revalidatePath aplica cambios inmediatamente |
 | 2026-02-24 | Asignación de agentes en modal CRM | CRM | ✅ Implementado (select con equipo en modal de lead) |
 | 2026-02-24 | Mapa interactivo con búsqueda de propiedades por zona | UX | ⏳ Pendiente (react-leaflet ya disponible en /mapa) |
-| 2026-02-24 | Autocompletado de dirección con Google Maps Places API | UX | ⏳ Pendiente — requiere API key de Google Cloud |
+| 2026-02-24 | Autocompletado de dirección con Google Maps Places API | UX | ✅ Resuelto con georef AR — no requiere API key |
+| 2026-02-25 | Provincia de búsqueda configurable por tenant (hoy hardcodeado a Buenos Aires) | UX | ⏳ Pendiente |
+| 2026-02-25 | Geocodificar propiedades existentes via herramienta batch | Mapa | ⏳ Pendiente — usar /dashboard/herramientas/geocodificacion |

@@ -2,7 +2,7 @@
 
 Roadmap de features ordenado por prioridad. Cada sección indica el estado actual.
 
-> **Última actualización**: 2026-02-24
+> **Última actualización**: 2026-02-25
 
 ---
 
@@ -87,8 +87,18 @@ Roadmap de features ordenado por prioridad. Cada sección indica el estado actua
 - [x] **Cotización del dólar**: `DolarWidget` server component en el dashboard del tenant. Muestra tasas Oficial / Blue / MEP desde `dolarapi.com`. Cache de 5 minutos (`next: { revalidate: 300 }`). Carga asíncrona con Suspense (no bloquea el dashboard)
 - [x] **Build estabilizado**: Corregidos errores TypeScript (`useRef` tipado, `ICON_COLORS.orange` → `amber`). `ignoreBuildErrors` + `ignoreDuringBuilds` en `next.config.ts` para resolver conflicto de tipos de `next-auth` con pnpm en monorepo. React Doctor: **93/100**
 
+### ✅ Completado (Bloque E — Mapa & Geocodificación — 2026-02-25)
+- [x] **Auto-geocodificación de propiedades**: Al crear o editar una propiedad, se llama a Nominatim en segundo plano (fire-and-forget) para guardar `latitude`/`longitude`. Utilidad `geocodeAddress()` en `packages/api/src/utils/geocode.ts`. No bloquea la respuesta al usuario
+- [x] **Botón "Ver en mapa"**: En `/propiedades`, botón que navega a `/mapa` preservando los filtros activos (operación, tipo, ciudad). La página del mapa lee `searchParams` y pre-carga los filtros
+- [x] **Mapa centrado en Provincia de Buenos Aires**: Default center `-35.5, -59.5` zoom 8. Se centra automáticamente en el promedio de las propiedades cuando hay marcadores
+- [x] **Herramienta de geocodificación batch**: Endpoint `POST /api/properties/geocode-batch` que geocodifica todas las propiedades existentes sin coordenadas (respeta rate limit de 1 req/seg). Página `/dashboard/herramientas/geocodificacion` con botón, spinner y resultado
+- [x] **Autocompletado de dirección — reescritura con georef Argentina**: Reemplazado Nominatim/Mapbox/HERE por la API oficial del gobierno argentino (`apis.datos.gob.ar/georef`). Tres endpoints en paralelo: `/localidades` (ciudades/barrios), `/municipios` (partidos GBA), `/direcciones` (calles). Filtrado a Provincia de Buenos Aires via `provincia=` param. Constante `SEARCH_PROVINCE` lista para hacer configurable por tenant
+- [x] **Autocomplete — keyboard navigation**: Enter selecciona primera sugerencia, flechas navegan, Escape cierra. Fix display de localidades (mostraban vacío — address es `""` para localidades, ahora muestra ciudad)
+- [x] **SearchSection — fix input vacío post-selección**: Al seleccionar una localidad, el input del buscador mostraba vacío (`data.address` es `""` para localidades). Fix: `data.address || data.city`
+
 ### 🔲 Pendiente
 - [ ] **Dominio custom**: Configuración de dominio propio por tenant
+- [ ] **Provincia de búsqueda configurable por tenant**: `SEARCH_PROVINCE` en `/api/address/route.ts` hardcodeado a "Buenos Aires" — hacer configurable desde la configuración del tenant
 
 ---
 

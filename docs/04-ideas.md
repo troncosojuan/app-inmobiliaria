@@ -32,8 +32,8 @@ Listado de ideas para explorar. No están priorizadas ni validadas, son brainsto
 - **A/B testing**: Framework para testear distintos layouts de homepage por tenant
 - **CDN por tenant**: Subdominio de CDN para assets estáticos de cada tenant
 - **API REST completa + docs**: Documentar API con Swagger/OpenAPI para integraciones externas
-- **Google Maps / Mapbox autocompletado**: Integrar Places API para autocompletar dirección mientras se escribe y rellenar automáticamente ciudad, provincia, coordenadas. También en el buscador de /propiedades. *(Requiere API key con billing en Google Cloud)*
-- **Mapa interactivo con búsqueda por zona**: Página `/mapa` ya tiene react-leaflet con pins. Pendiente: búsqueda visual en el mapa (dibujar zona, filtrar por bounds), popup rico con foto, precio y botón de contacto. Similar a ZonaProp/Zonaprop.
+- ~~**Google Maps / Mapbox autocompletado**~~: ✅ Resuelto con georef AR (apis.datos.gob.ar) — sin API key, cubre localidades, municipios y calles. Restringido a Buenos Aires Province (configurable)
+- **Mapa interactivo con búsqueda por zona**: Página `/mapa` tiene react-leaflet con pins y geocodificación automática. Pendiente: búsqueda visual dibujando zona en el mapa (filtrar por bounds). Similar a ZonaProp.
 
 ## Monetización
 
